@@ -11,7 +11,7 @@ RUN apt-get update && \
 	python3 \
 	python3-pip
 # install deps
-RUN pip3 install django psycopg2
+RUN pip3 install django psycopg2 django-cors-headers
 
 
 # add our code
