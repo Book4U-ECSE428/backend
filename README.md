@@ -10,9 +10,9 @@
 the first command will download and install all dependencies 
 
 the second command will start the server
+
 4. go to [http://127.0.0.1/](http://127.0.0.1/) and you should see the main page (there isn't one as of 2018-2-4)
-5. go to [http://127.0.0.1/admin](http://127.0.0.1/admin) and you should see the admin page, log in as 'admin' password: 'books4ubooks4u' 
-here you can use the admin page to edit the database.
+5. go to [http://127.0.0.1/admin](http://127.0.0.1/admin) and you should see the admin page, log in as 'admin' password: 'books4ubooks4u'here you can use the admin page to edit the database.
 
 ## Basics of development: 
 1. Define api url in code/books4u/api.py
