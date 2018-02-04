@@ -3,10 +3,10 @@
 1. install Docker [Download Docker](https://www.docker.com/community-edition#/download)
 2. git clone this repo
 3. cd into repo folder(the folder contains Dockerfile) and run:
-
-
+```
     docker build -t books4u .
     docker run -p 80:80 books4u
+```
 the first command will download and install all dependencies 
 
 the second command will start the server
