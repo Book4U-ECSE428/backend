@@ -11,14 +11,11 @@ many - many: models.ManyToManyField in either
 one - many: foreignkey in many
 """
 GENDER_CHOICES = (
-    ("Male", 'Male'),
-    ("Female", 'Female'),
+    ("Male", "Male"),
+    ("Female", "Female"),
+    ("Unknown", "Unknown")
 )
 
-STATUS_CHOICES = (
-    ("BLOCKED", 'BLOCKED'),
-    ("NORMAL", 'NORMAL'),
-)
 PERMISSION_CHOICES = (
     ("BLOCK_USER", 'BLOCK_USER'),
     ("Normal", 'Normal'),
@@ -36,10 +33,8 @@ class User(models.Model):
     name = models.CharField(max_length=100, default="")
     password = models.CharField(max_length=100, default="")
     e_mail = models.CharField(max_length=100, default="")
-    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Male")
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
     personal_intro = models.CharField(max_length=1000, default="")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NORMAL")
-    # moderator is just a user with permission
     permission = models.ManyToManyField(Permission)
 
     def __str__(self):
@@ -68,7 +63,7 @@ class Book(models.Model):
     publish_firm = models.CharField(max_length=30)
     edition = models.CharField(max_length=30)
     visibility = models.BooleanField(default=False)
-    category = models.ForeignKey(BookCategory, on_delete=models.CASCADE)
+    category = models.ManyToManyField(BookCategory)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -76,39 +71,36 @@ class Book(models.Model):
 
 
 class Review(models.Model):
-    book = models.OneToOneField(
-        Book,
-        on_delete=models.CASCADE,
-        primary_key=False,
-    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=9999)
-    rating = models.BigIntegerField()
+    rating = models.IntegerField()
+    book = models.ForeignKey(Book, on_delete=models.PROTECT)
 
     def __str__(self):
-        return "user: {}, book: {}".format(self.user.name, self.book.name)
-
-
-class Comment(models.Model):
-    index = models.BigIntegerField()
-    review = models.ForeignKey(Review, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return "comment by:" + self.user.name
+        return str(self.user.name)
 
 
 class Vote(models.Model):
-    review = models.OneToOneField(
-        Review,
-        on_delete=models.CASCADE,
-        primary_key=False,
-    )
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         primary_key=False,
     )
+    count = models.IntegerField(default=0)
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.SET_NULL,
+        null=True
+    )
 
     def __str__(self):
         return "vote by: " + self.user.name
+
+
+class Comment(models.Model):
+    index = models.IntegerField()
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "comment by: " + self.user.name
