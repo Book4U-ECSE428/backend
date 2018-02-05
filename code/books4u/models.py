@@ -16,10 +16,6 @@ GENDER_CHOICES = (
     ("Unknown", "Unknown")
 )
 
-STATUS_CHOICES = (
-    ("BLOCKED", 'BLOCKED'),
-    ("NORMAL", 'NORMAL'),
-)
 PERMISSION_CHOICES = (
     ("BLOCK_USER", 'BLOCK_USER'),
     ("Normal", 'Normal'),
@@ -39,8 +35,6 @@ class User(models.Model):
     e_mail = models.CharField(max_length=100, default="")
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
     personal_intro = models.CharField(max_length=1000, default="")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NORMAL")
-    # moderator is just a user with permission
     permission = models.ManyToManyField(Permission)
 
     def __str__(self):
