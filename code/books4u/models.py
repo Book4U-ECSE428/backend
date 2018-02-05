@@ -11,8 +11,9 @@ many - many: models.ManyToManyField in either
 one - many: foreignkey in many
 """
 GENDER_CHOICES = (
-    ("Male", 'Male'),
-    ("Female", 'Female'),
+    ("Male", "Male"),
+    ("Female", "Female"),
+    ("Unknown", "Unknown")
 )
 
 STATUS_CHOICES = (
@@ -68,7 +69,7 @@ class Book(models.Model):
     publish_firm = models.CharField(max_length=30)
     edition = models.CharField(max_length=30)
     visibility = models.BooleanField(default=False)
-    category = models.ForeignKey(BookCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(BookCategory, on_delete=models.PROTECT)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -83,14 +84,14 @@ class Review(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=9999)
-    rating = models.BigIntegerField()
+    rating = models.IntegerField()
 
     def __str__(self):
         return "user: {}, book: {}".format(self.user.name, self.book.name)
 
 
 class Comment(models.Model):
-    index = models.BigIntegerField()
+    index = models.IntegerField()
     review = models.ForeignKey(Review, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -104,7 +105,7 @@ class Vote(models.Model):
         on_delete=models.CASCADE,
         primary_key=False,
     )
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         primary_key=False,
