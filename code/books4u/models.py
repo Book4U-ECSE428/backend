@@ -37,7 +37,7 @@ class User(models.Model):
     name = models.CharField(max_length=100, default="")
     password = models.CharField(max_length=100, default="")
     e_mail = models.CharField(max_length=100, default="")
-    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Male")
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
     personal_intro = models.CharField(max_length=1000, default="")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NORMAL")
     # moderator is just a user with permission
