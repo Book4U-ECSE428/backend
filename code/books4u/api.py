@@ -26,13 +26,12 @@ def create_account(request):
             account_e_mail = request.POST.get('e_mail')
             account_gender = request.POST.get('gender')
         except ValueError:
-            print("Failed getting request")
+            HttpResponse(json.dumps({'status': 'failure_get'}))
         try:
             new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender)
             new_user.save()
         except(TypeError, ValueError):
-            print("Failed saving data")
-        return HttpResponse("success")
+            HttpResponse(json.dumps({'status': 'failure_save'}))
+        return HttpResponse(json.dumps({'status': 'success'}))
     else:
-        return HttpResponse("failure")
-
+        return HttpResponse(json.dumps({'status': 'failure_method'}))
