@@ -86,7 +86,7 @@ class Vote(models.Model):
         on_delete=models.CASCADE,
         primary_key=False,
     )
-    count = models.IntegerField()
+    count = models.IntegerField(default=0)
     review = models.ForeignKey(
         Review,
         on_delete=models.SET_NULL,

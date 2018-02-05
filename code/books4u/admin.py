@@ -13,7 +13,6 @@ class UserAdmin(admin.ModelAdmin):
         'e_mail',
         'gender',
         'personal_intro',
-        'status',
     ]
 
 
@@ -37,7 +36,6 @@ class BookAdmin(admin.ModelAdmin):
         'publish_firm',
         'edition',
         'visibility',
-        'category',
         'author',
     ]
 
