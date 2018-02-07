@@ -113,4 +113,4 @@ class UtilsTestCase(TestCase):
         session_key = response.get('session_key')
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
-            self.assertTrue(is_session_expired(session))
+            self.assertFalse(is_session_expired(session))
