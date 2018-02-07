@@ -34,18 +34,18 @@ def add_book(request):
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'
-                return HttpResponse(json.dumps(response_data) content_type="application/json")
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
                 
             #check if the input category exists
             try:
-                category_o = BookCategory.objects.get(name == author_)
+                category_o = BookCategory.objects.get(name=author_)
             except DoesNotExist: #build-in exception raised by get
                 category_o = BookCategory(name=category_)
                 category_o.save()
 
             #check if the input author exists
             try:
-                author_o = Author.objects.get(name == author_)
+                author_o = Author.objects.get(name=author_)
             except DoesNotExist:
                 author_o = Author(name=author_, summary='')
                 author_o.save()
@@ -80,9 +80,9 @@ def get_pending_books(request):
                 pending_books = Book.objects.filter(visibility=False)
                 for book in pending_books:
                     response_data["books"].append({
-                        "name": b.name,
-                        "author": b.author.name,
-                        "publish_date": str(b.publish_date),
+                        "name": book.name,
+                        "author": book.author.name,
+                        "publish_date": str(book.publish_date),
                     })
                 response_data["status"] = 'success'
 
