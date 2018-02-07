@@ -49,7 +49,7 @@ def login(request):
             else:
                 ss.create()
                 ss['user_id'] = user.id
-                ss.set_expiry(3)
+                ss.set_expiry(1800)
                 key = ss.session_key
                 ss.save()
             response_data['status'] = 'success'
