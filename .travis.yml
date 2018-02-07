@@ -3,7 +3,7 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install django psycopg2 django-cors-header
+  - pip install --upgrade django psycopg2 django-cors-header
 # command to run tests
 script:
   - cd code/ && python manage.py test
