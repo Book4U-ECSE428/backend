@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 """
 one - one: models.OneToOneField(
@@ -23,20 +22,23 @@ PERMISSION_CHOICES = (
 )
 
 
-# class Permission(models.Model):
-#     name = models.CharField(max_length=20, choices=PERMISSION_CHOICES, default="Normal")
-#
-#     def __str__(self):
-#         return self.name
-
-
-class Person(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
-    personal_intro = models.CharField(max_length=1000, default="")
+class Permission(models.Model):
+    name = models.CharField(max_length=20, choices=PERMISSION_CHOICES, default="Normal")
 
     def __str__(self):
-        return self.user.first_name + self.user.last_name
+        return self.name
+
+
+class User(models.Model):
+    name = models.CharField(max_length=100, default="")
+    password = models.CharField(max_length=100, default="")
+    e_mail = models.CharField(max_length=100, default="")
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
+    personal_intro = models.CharField(max_length=1000, default="")
+    permission = models.ManyToManyField(Permission)
+
+    def __str__(self):
+        return self.name + '' + self.e_mail
 
 
 class BookCategory(models.Model):

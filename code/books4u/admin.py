@@ -6,9 +6,9 @@ from .models import *
 admin.site.site_header = admin.site.site_title = admin.site.index_title = 'Books4U'
 
 
-class PersonAdmin(admin.ModelAdmin):
+class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'user',
+        'e_mail',
         'gender',
         'personal_intro',
     ]
@@ -69,7 +69,8 @@ class VoteAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(Person, PersonAdmin)
+admin.site.register(Permission, PermissionAdmin)
+admin.site.register(User, UserAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(BookCategory, BookCategoryAdmin)
 admin.site.register(Review, ReviewAdmin)

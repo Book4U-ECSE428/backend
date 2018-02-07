@@ -70,8 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ECSE428.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 # sqlite database use for testing db only!!!
 # DATABASES = {
 #     'default': {
@@ -79,7 +77,7 @@ WSGI_APPLICATION = 'ECSE428.wsgi.application'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-#
+
 # real database
 DATABASES = {
     'default': {
@@ -128,3 +126,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
