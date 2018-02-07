@@ -20,4 +20,4 @@ COPY ./code /
 EXPOSE 80
 EXPOSE 5432
 
-CMD ["python3","manage.py", "runserver", "0.0.0.0:80" ]
+CMD ["python3","manage.py", "test"]
