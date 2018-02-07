@@ -12,7 +12,7 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-        p = Permission.object.create('Normal')
+        p = Permission.objects.create('Normal')
         User.objects.create(e_mail='n@n.com', password='pwd')
         User.objects.create(e_mail='m@m.com', password='pwd', permissoon=p)
 
