@@ -1,9 +1,14 @@
+os:
+  - linux
 language: python
 python:
+  - "3.5"
   - "3.6"
 # command to install dependencies
-install:
-  - pip install --upgrade django psycopg2 django-cors-header==2.1.0
+services:
+  - docker
+before_script:
+  - docker build -t books4u .
 # command to run tests
 script:
-  - cd code/ && python manage.py test
+  - docker run books4u
