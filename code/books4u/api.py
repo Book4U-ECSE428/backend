@@ -61,3 +61,5 @@ def login(request):
         response_data['status'] = 'fail'
         response_data['reason'] = 'missing field'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def rating_display(request):
