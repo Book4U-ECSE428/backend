@@ -1,0 +1,13 @@
+os:
+  - linux
+language: python
+python:
+  - "3.6"
+# command to install dependencies
+services:
+  - docker
+before_script:
+  - docker build -t books4u .
+# command to run tests
+script:
+  - docker run books4u
