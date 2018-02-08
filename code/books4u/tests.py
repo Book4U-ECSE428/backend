@@ -12,9 +12,8 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-        p = Permission.objects.create('Normal')
         User.objects.create(e_mail='n@n.com', password='pwd')
-        User.objects.create(e_mail='m@m.com', password='pwd', permissoon=p)
+        User.objects.create(e_mail='m@m.com', password='pwd', permissoon=Permission.objects.create('Normal'))
 
     # TODO will work on it later
     def test_add_book(self):
