@@ -63,3 +63,30 @@ def login(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 def rating_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    isbn = request.POST.get('ISBN')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif isbn is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no ISBN key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['reviews'] = list()
+            b = Book.objects.get(ISBN=isbn)
+            review_list = Review.objects.filter(book=b)
+            for r in review_list:
+                response_data['reviews'].append({
+                    "user":r.user.name,
+                    "content": r.content,
+                    "rating": r.rating,
+                })
+            response_data['status'] = 'success'
+            
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
