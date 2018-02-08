@@ -3,6 +3,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 
+
 class EmptyInputError(Exception):
     """Raised when input value is None"""
 
@@ -12,12 +13,27 @@ def check_none(input):
     
     return input
 
+
+def authenticate(e_mail, pwd):
+    userlist = User.objects.filter(e_mail=e_mail, password=pwd)  # get user based on his username
+    if len(userlist) == 1:  # user not found, return none
+        if userlist[0].password == pwd:  # check password
+            return userlist[0]
+        else:
+            return None
+    else:
+        return None
+
+
+
 def is_logged_in(user):
     key = get_session_key_from_user(user)
     return True if key is not None else False
 
+
 def is_session_expired(session):
     return True if session.expire_date <= timezone.now() else False
+
 
 def get_session_key_from_user(user):
     ss = Session.objects.all()

@@ -8,8 +8,6 @@ admin.site.site_header = admin.site.site_title = admin.site.index_title = 'Books
 
 class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'name',
-        'password',
         'e_mail',
         'gender',
         'personal_intro',
@@ -71,8 +69,8 @@ class VoteAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(User, UserAdmin)
 admin.site.register(Permission, PermissionAdmin)
+admin.site.register(User, UserAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(BookCategory, BookCategoryAdmin)
 admin.site.register(Review, ReviewAdmin)

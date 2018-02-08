@@ -8,4 +8,6 @@ urlpatterns = [
     path('get_pending_books/', api.get_pending_books),
     path('commit_book/', api.commit_book),
     path('reject_book/', api.reject_book),
+    path('getAllBooks/', api.get_all_books),
+    path('login/', api.login),
 ]
