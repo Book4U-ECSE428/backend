@@ -20,20 +20,18 @@ def get_all_books(request):
 
 def create_account(request):
     if request.method == "POST":
-        account_name = request.POST.get('name')
-        if User.objects.filter(name=account_name).exists():
-            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'name_taken'}))
+        account_name = request.POST.get('name', '')
         account_password = request.POST.get('password')
         # Password filter can be implemented here
         account_e_mail = request.POST.get('e_mail')
         if User.objects.filter(e_mail=account_e_mail).exists():
-            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'existing_email'}))
-        account_gender = request.POST.get('gender')
+            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'existing_email'}), content_type="application/json")
+        account_gender = request.POST.get('gender', '')
         try:
             new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender)
             new_user.save()
         except :
-            HttpResponse(json.dumps({'status': 'failure', 'detail': 'saving'}))
-        return HttpResponse(json.dumps({'status': 'success'}))
+            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'saving'}), content_type="application/json")
+        return HttpResponse(json.dumps({'status': 'success'}), content_type="application/json")
     else:
-        return HttpResponse(json.dumps({'status': 'failure', 'detail': 'method'}))
+        return HttpResponse(json.dumps({'status': 'failure', 'detail': 'method'}), content_type="application/json")
