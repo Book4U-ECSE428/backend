@@ -12,9 +12,11 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-        User.objects.create(e_mail='n@n.com', password='pwd')
-        User.objects.create(e_mail='m@m.com', password='pwd', permissoon=Permission.objects.create('Normal'))
-
+        permission = Permission.objects.create(name='Normal')
+        user = User.objects.create(e_mail='n@n.com', password='pwd')
+        moderator = User.objects.create(e_mail='m@m.com', password='pwd')
+        moderator.permission.set([permission])
+        
     # TODO will work on it later
     def test_add_book(self):
         pass
