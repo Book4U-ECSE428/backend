@@ -70,6 +70,7 @@ def create_account(request):
         account_password = request.POST.get('password')
         account_e_mail = request.POST.get('e_mail')
         account_gender = request.POST.get('gender', 'Unknown')
+        account_personal_intro = request.POST.get('personal_intro', '')
         if account_name is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'missing name'
@@ -80,7 +81,7 @@ def create_account(request):
             response_data['status'] = 'fail'
             response_data['reason'] = 'pwd_filter_failure'
         else:
-            new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender)
+            new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender, personal_intro=account_personal_intro)
             new_user.save()
             if User.objects.filter(e_mail=account_e_mail).exists():
                 response_data['status'] = 'success'
