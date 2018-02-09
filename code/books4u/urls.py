@@ -5,5 +5,6 @@ from . import api
 
 urlpatterns = [
     path('getAllBooks/', api.get_all_books),
+    path('createAccount/', api.create_account),
     path('login/', api.login),
 ]
