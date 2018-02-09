@@ -9,10 +9,19 @@ def password_filter(pwd):
 
     length_check = len(pwd) > 8
     digit_check = re.search(r"\d", pwd)
+    if digit_check is None:
+        digit_check = False
+    else:
+        digit_check = True
     uppercase_check = re.search(r"[A-Z]", pwd)
+    if uppercase_check is None:
+        uppercase_check = False
+    else:
+        uppercase_check = True
     pwd_check = (length_check and digit_check and uppercase_check)
-    # TODO: Return detailed result
+    # TODO in sprint 3: Return detailed result
     return pwd_check
+
 
 def authenticate(e_mail, pwd):
     userlist = User.objects.filter(e_mail=e_mail, password=pwd)  # get user based on his username

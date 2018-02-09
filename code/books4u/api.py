@@ -64,19 +64,30 @@ def login(request):
 
 
 def create_account(request):
+    response_data = dict()
     if request.method == "POST":
-        account_name = request.POST.get('name', '')
+        account_name = request.POST.get('name')
         account_password = request.POST.get('password')
-        # Password filter can be implemented here
         account_e_mail = request.POST.get('e_mail')
-        if User.objects.filter(e_mail=account_e_mail).exists():
-            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'existing_email'}), content_type="application/json")
-        account_gender = request.POST.get('gender', '')
-        try:
+        account_gender = request.POST.get('gender', 'Unknown')
+        if account_name is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'missing name'
+        elif User.objects.filter(e_mail=account_e_mail).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_email'
+        elif not password_filter(account_password):
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'pwd_filter_failure'
+        else:
             new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender)
             new_user.save()
-        except :
-            return HttpResponse(json.dumps({'status': 'failure', 'detail': 'saving'}), content_type="application/json")
-        return HttpResponse(json.dumps({'status': 'success'}), content_type="application/json")
+            if User.objects.filter(e_mail=account_e_mail).exists():
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'saving failure'
     else:
-        return HttpResponse(json.dumps({'status': 'failure', 'detail': 'method'}), content_type="application/json")
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
