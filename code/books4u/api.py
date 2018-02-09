@@ -74,6 +74,9 @@ def create_account(request):
         if account_name is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'missing name'
+        elif account_e_mail is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'missing email'
         elif User.objects.filter(e_mail=account_e_mail).exists():
             response_data['status'] = 'fail'
             response_data['reason'] = 'existing_email'
