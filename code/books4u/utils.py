@@ -8,7 +8,7 @@ class EmptyInputError(Exception):
     """Raised when input value is None"""
 
 def check_none(input):
-    if input is None:
+    if input is None or input.isspace() or input =='':
         raise EmptyInputError
     
     return input

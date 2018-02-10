@@ -82,9 +82,10 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, edition=edition_, category=category_o,
+            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, edition=edition_,
                             author=author_o)
             new_book.save()
+            new_book.category.set([category_o])
 
             response_data["status"] = 'success'
 
@@ -108,19 +109,21 @@ def get_pending_books(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            if user.permission.name != 'Normal':
+            try:
+                p = user.permission.get(name='Normal')
+            except:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
-            else:
-                response_data["books"] = list()
-                pending_books = Book.objects.filter(visibility=False)
-                for book in pending_books:
-                    response_data["books"].append({
-                        "name": book.name,
-                        "author": book.author.name,
-                        "publish_date": str(book.publish_date),
-                    })
-                response_data["status"] = 'success'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+            response_data["books"] = list()
+            pending_books = Book.objects.filter(visibility=False)
+            for book in pending_books:
+                response_data["books"].append({
+                    "name": book.name,
+                    "author": book.author.name,
+                    "publish_date": str(book.publish_date),
+                })
+            response_data["status"] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -142,28 +145,31 @@ def commit_book(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            if user.permission.name != 'Normal':
+            try:
+                p = user.permission.get(name='Normal')
+            except:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
-            else:
-                try:
-                    ISBN_ = check_none(request.POST.get('ISBN'))
-                except EmptyInputError:
-                    response_data["status"] = 'fail'
-                    response_data["reason"] = 'missing required field'
-                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+        
+            try:
+                ISBN_ = check_none(request.POST.get('ISBN'))
+            except EmptyInputError:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'missing required field'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-                # check if the input book exists
-                try:
-                    Book.objects.get(ISBN=ISBN_)
-                except ObjectDoesNotExist:  # build-in exception raised by get
-                    response_data["status"] = 'fail'
-                    response_data["reason"] = 'book does not exist'
-                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+            # check if the input book exists
+            try:
+                Book.objects.get(ISBN=ISBN_)
+            except ObjectDoesNotExist:  # build-in exception raised by get
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'book does not exist'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-                # commit the book by setting visibility to true
-                Book.objects.get(ISBN=ISBN_).visibility = True
-                response_data["status"] = 'success'
+            # commit the book by setting visibility to true
+            Book.objects.get(ISBN=ISBN_).visibility = True
+            response_data["status"] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -185,41 +191,33 @@ def reject_book(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            if user.permission.name != 'Normal':
+            try:
+                p = user.permission.get(name='Normal')
+            except:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
-            else:
-                try:
-                    ISBN_ = check_none(request.POST.get('ISBN'))
-                except EmptyInputError:
-                    response_data["status"] = 'fail'
-                    response_data["reason"] = 'missing required field'
-                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+            
+            try:
+                ISBN_ = check_none(request.POST.get('ISBN'))
+            except EmptyInputError:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'missing required field'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-                # check if the input book exists
-                try:
-                    Book.objects.get(ISBN=ISBN_)
-                except ObjectDoesNotExist:  # build-in exception raised by get
-                    response_data["status"] = 'fail'
-                    response_data["reason"] = 'book does not exist'
-                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+            # check if the input book exists
+            try:
+                Book.objects.get(ISBN=ISBN_)
+            except ObjectDoesNotExist:  # build-in exception raised by get
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'book does not exist'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-                # reject a book by deleting it
-                Book.objects.get(ISBN=ISBN_).delete()
-                return HttpResponse(json.dumps({'status': 'success'}))
-            response_data["books"] = list()
-            response_data["user"] = user.name
+            # reject a book by deleting it
+            Book.objects.get(ISBN=ISBN_).delete()
             response_data["status"] = 'success'
-            book_list = Book.objects.all()
-            for b in book_list:
-                response_data["books"].append({
-                    "name": b.name,
-                    "author": b.author.name,
-                    "publish_date": str(b.publish_date),
-                })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
 
 def login(request):
     response_data = dict()

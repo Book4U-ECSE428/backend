@@ -11,24 +11,129 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-
         permission = Permission.objects.create(name='Normal')
-        user = User.objects.create(e_mail='n@n.com', password='pwd')
+        user = User.objects.create(e_mail='t@t.com', password='pwd')
         moderator = User.objects.create(e_mail='m@m.com', password='pwd')
         moderator.permission.set([permission])
-        User.objects.create(e_mail='t@t.com', password='pwd')
+        
+        category = BookCategory.objects.create(name='test_category_1')
+        author = Author.objects.create(name='test_author', summary='t')
+        book_c = Book.objects.create(ISBN='123456789-1', name='test_book_pending', publish_date='2018-02-10', edition='1st edition', author=author)
+        book_c.category.set([category])
+        book_r = Book.objects.create(ISBN='123456789-2', name='test_book_pending', publish_date='2018-02-10', edition='1st edition', author=author)
+        book_r.category.set([category])
+        
+        
+
     # TODO will work on it later
     def test_add_book(self):
-        pass
+        print("test_add_book success case")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test_add_book wrong session key")
+        response = c.post('/api/getAllBooks/', {'session_key': "aaaaaaaaa"})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('session expired', response.get('reason'))
+        print("test_add_book no session key")
+        response = c.post('/api/getAllBooks/', {})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('no session key', response.get('reason'))
+        print("test_add_book missing field : ISBN")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '', 'name': 'test_book', 'publish_date': '2018-02-10', 'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : name")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': '', 'publish_date': '2018-02-10', 'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : publish_date")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : edition")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'edition': '', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : category")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'edition': '1st edition', 'category': '', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : author")
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'edition': '1st edition', 'category': 'test_category', 'author': ''})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
 
     def test_get_pending_books(self):
         pass
 
     def test_commit_book(self):
-        pass
+        print("test_commit_book success case")
+        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-1'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test_commit_book book does not exist")
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-3'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('book does not exist', response.get('reason'))
+        Session.objects.all()[0].delete()
+        print("test_commit_book permission denied")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-1'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('permission denied', response.get('reason'))
+
 
     def test_reject_book(self):
-        pass
+        print("test_commit_book success case")
+        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test_commit_book book does not exist")
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-3'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('book does not exist', response.get('reason'))
+        Session.objects.all()[0].delete()
+        print("test_commit_book permission denied")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('permission denied', response.get('reason'))
         
 
     def test_login(self):
@@ -132,4 +237,3 @@ class UtilsTestCase(TestCase):
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
-
