@@ -111,7 +111,7 @@ def get_pending_books(request):
             response_data["user"] = user.name
             try:
                 p = user.permission.get(name='Normal')
-            except:
+            except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -147,7 +147,7 @@ def commit_book(request):
             response_data["user"] = user.name
             try:
                 p = user.permission.get(name='Normal')
-            except:
+            except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -193,7 +193,7 @@ def reject_book(request):
             response_data["user"] = user.name
             try:
                 p = user.permission.get(name='Normal')
-            except:
+            except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
