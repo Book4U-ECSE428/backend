@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.test import Client
+from django.contrib.auth.hashers import make_password, check_password
 from .models import *
 from .utils import *
 
@@ -11,8 +12,8 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-        User.objects.create(e_mail='michael@example.com', password='Password123', name='michael')
-        User.objects.create(e_mail='t@t.com', password='pwd')
+        User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
+        User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
 
     def test_create_account(self):
         print("test_create_account#1 success case")
@@ -84,7 +85,7 @@ class ApiTestCase(TestCase):
 
 class UtilsTestCase(TestCase):
     def setUp(self):
-        User.objects.create(e_mail='t@t.com', password='pwd')
+        User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
 
     def test_pwd_filter(self):
         print("test password filter success")
@@ -102,7 +103,7 @@ class UtilsTestCase(TestCase):
         print("test_authenticate success")
         u = authenticate(e_mail="t@t.com", pwd='pwd')
         self.assertEqual('t@t.com', u.e_mail)
-        self.assertEqual('pwd', u.password)
+        self.assertTrue(check_password('pwd', u.password))
         print("test_authenticate fail email")
         u = authenticate(e_mail="aaaaaa@t.com", pwd='pwd')
         self.assertEqual(None, u)

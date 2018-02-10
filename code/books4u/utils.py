@@ -2,6 +2,7 @@ from .models import *
 import re
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
+from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
 
 
@@ -24,9 +25,9 @@ def password_filter(pwd):
 
 
 def authenticate(e_mail, pwd):
-    userlist = User.objects.filter(e_mail=e_mail, password=pwd)  # get user based on his username
+    userlist = User.objects.filter(e_mail=e_mail)  # get user based on his username
     if len(userlist) == 1:  # user not found, return none
-        if userlist[0].password == pwd:  # check password
+        if check_password(pwd, userlist[0].password):  # check password
             return userlist[0]
         else:
             return None

@@ -6,6 +6,7 @@ from .models import *
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
 from datetime import datetime, timedelta
+from django.contrib.auth.hashers import make_password
 from .utils import *
 
 ss = SessionStore()
@@ -84,7 +85,7 @@ def create_account(request):
             response_data['status'] = 'fail'
             response_data['reason'] = 'pwd_filter_failure'
         else:
-            new_user = User(name=account_name, password=account_password, e_mail=account_e_mail, gender=account_gender, personal_intro=account_personal_intro)
+            new_user = User(name=account_name, password=make_password(account_password), e_mail=account_e_mail, gender=account_gender, personal_intro=account_personal_intro)
             new_user.save()
             if User.objects.filter(e_mail=account_e_mail).exists():
                 response_data['status'] = 'success'
