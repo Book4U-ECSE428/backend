@@ -1,13 +1,33 @@
 from .models import *
+import re
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
+from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
 
 
+def password_filter(pwd):
+
+    length_check = len(pwd) > 8
+    digit_check = re.search(r"\d", pwd)
+    if digit_check is None:
+        digit_check = False
+    else:
+        digit_check = True
+    uppercase_check = re.search(r"[A-Z]", pwd)
+    if uppercase_check is None:
+        uppercase_check = False
+    else:
+        uppercase_check = True
+    pwd_check = (length_check and digit_check and uppercase_check)
+    # TODO in sprint 3: Return detailed result
+    return pwd_check
+
+
 def authenticate(e_mail, pwd):
-    userlist = User.objects.filter(e_mail=e_mail, password=pwd)  # get user based on his username
+    userlist = User.objects.filter(e_mail=e_mail)  # get user based on his username
     if len(userlist) == 1:  # user not found, return none
-        if userlist[0].password == pwd:  # check password
+        if check_password(pwd, userlist[0].password):  # check password
             return userlist[0]
         else:
             return None
@@ -45,3 +65,4 @@ def get_user_from_session_key(session_key):
         return None
     else:
         return User.objects.filter(pk=session[0].get_decoded().get('user_id'))[0]
+

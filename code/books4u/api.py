@@ -6,6 +6,7 @@ from .models import *
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
 from datetime import datetime, timedelta
+from django.contrib.auth.hashers import make_password
 from .utils import *
 
 ss = SessionStore()
@@ -89,4 +90,65 @@ def rating_display(request):
                 })
             response_data['status'] = 'success'
             
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def Comments_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    request_review = request.POST.get('Review')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif request_review is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no review requested'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['comments'] = list()
+            comment_list = Comment.objects.filter(review=request_review)
+            for c in comment_list:
+                response_data['comments'].append({
+                    "user": c.user.name,
+                    "content": c.content,
+                    "index": c.index,
+                })
+            response_data['status'] = 'success'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def create_account(request):
+    response_data = dict()
+    if request.method == "POST":
+        account_name = request.POST.get('name')
+        account_password = request.POST.get('password')
+        account_e_mail = request.POST.get('e_mail')
+        account_gender = request.POST.get('gender', 'Unknown')
+        account_personal_intro = request.POST.get('personal_intro', '')
+        if account_name is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'missing name'
+        elif account_e_mail is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'missing email'
+        elif User.objects.filter(e_mail=account_e_mail).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_email'
+        elif not password_filter(account_password):
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'pwd_filter_failure'
+        else:
+            new_user = User(name=account_name, password=make_password(account_password), e_mail=account_e_mail, gender=account_gender, personal_intro=account_personal_intro)
+            new_user.save()
+            if User.objects.filter(e_mail=account_e_mail).exists():
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'saving failure'
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
