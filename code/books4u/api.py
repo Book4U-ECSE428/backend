@@ -152,3 +152,33 @@ def create_account(request):
         response_data['status'] = 'fail'
         response_data['reason'] = 'request_method'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def update_comment(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    request_review = request.POST.get('Review')
+    new_content = request.POST.get('content')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif request_review is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no review requested'
+    else:
+        logged_user = get_user_from_session_key(session_key)
+        if logged_user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            try:
+                comment = Comment.objects.get(review=request_review, user=logged_user)
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'comment does not exist'
+            else:
+                comment.content = new_content
+                comment.save()
+                response_data['status'] = 'success'
+            
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+    
