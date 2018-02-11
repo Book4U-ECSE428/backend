@@ -92,7 +92,7 @@ def rating_display(request):
             
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-def Comments_display(request):
+def comments_display(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
     request_review = request.POST.get('Review')

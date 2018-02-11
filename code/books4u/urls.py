@@ -8,5 +8,5 @@ urlpatterns = [
     path('createAccount/', api.create_account),
     path('login/', api.login),
     path('rating_display/', api.rating_display),
-    path('comment_display/', api.comment_display),
+    path('comment_display/', api.comments_display),
 ]
