@@ -15,6 +15,7 @@ pip3 install django psycopg2 django-cors-headers
 python3 manage.py runserver
 ```
 ## admin page
+127.0.0.1:8000/admin
 ```
 user: admin
 password: books4ubooks4u
@@ -25,7 +26,7 @@ password: books4ubooks4u
 3. cd into repo folder(the folder contains Dockerfile) and run:
 ```
 docker build -t books4u .
-docker run -p books4u
+docker run books4u
 ```
 the first command will download and install all dependencies 
 the second command will start the test

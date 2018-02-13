@@ -42,7 +42,7 @@ class User(models.Model):
 
 
 class BookCategory(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -58,10 +58,10 @@ class Author(models.Model):
 
 class Book(models.Model):
     ISBN = models.CharField(max_length=30)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
     publish_date = models.DateField()
-    publish_firm = models.CharField(max_length=30)
-    edition = models.CharField(max_length=30)
+    publish_firm = models.CharField(max_length=100)
+    edition = models.CharField(max_length=100)
     visibility = models.BooleanField(default=False)
     category = models.ManyToManyField(BookCategory)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
