@@ -256,7 +256,6 @@ class ApiTestCase(TestCase):
         print("get book'info")
         response = c.post('/api/getBookByID/', {'session_key': session_key, 'id': 100})
         response = response.json()
-        print(response)
         self.assertEqual("book_visible", response.get('book_name'))
 
 
