@@ -17,6 +17,48 @@ ss = SessionStore()
 """
 
 
+def get_book_by_id(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            book_id = int(request.POST.get('id'))
+            if book_id is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no book id'
+            else:
+                try:
+                    book = Book.objects.get(pk=book_id)
+                except ObjectDoesNotExist:
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'does not exist'
+                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                response_data['book_name'] = book.name
+                response_data['book_ISBN'] = book.ISBN
+                response_data['book_publish_date'] = str(book.publish_date)
+                response_data['book_publish_firm'] = book.publish_firm
+                response_data['book_edition'] = book.edition
+                response_data['book_category'] = book.category.name
+                response_data['book_author'] = book.author.name
+                response_data['reviews'] = list()
+                review_list = book.review_set.all()
+                for r in review_list:
+                    response_data['reviews'].append({
+                        'user': r.user.name,
+                        'content': r.content[:100],
+                        'rating': r.rating,
+                        'id': r.id
+                    })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def get_all_books(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
