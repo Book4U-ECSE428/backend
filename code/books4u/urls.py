@@ -9,5 +9,6 @@ urlpatterns = [
     path('commit_book/', api.commit_book),
     path('reject_book/', api.reject_book),
     path('getAllBooks/', api.get_all_books),
+    path('createAccount/', api.create_account),
     path('login/', api.login),
 ]

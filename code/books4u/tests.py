@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.test import Client
+from django.contrib.auth.hashers import make_password, check_password
 from .models import *
 from .utils import *
 
@@ -11,6 +12,8 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
+        User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
+        User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
         permission = Permission.objects.create(name='Normal')
         user = User.objects.create(e_mail='t@t.com', password='pwd')
         moderator = User.objects.create(e_mail='m@m.com', password='pwd')
@@ -25,8 +28,6 @@ class ApiTestCase(TestCase):
         book_c = Book.objects.create(ISBN='123456789-9', name='test_book_verified', publish_date='2018-02-10', edition='1st edition', author=author, visibility=True)
         book_c.category.set([category])
         
-
-    # TODO will work on it later
     def test_add_book(self):
         print("test_add_book success case")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
@@ -159,6 +160,27 @@ class ApiTestCase(TestCase):
         self.assertEqual('permission denied', response.get('reason'))
         
 
+
+    def test_create_account(self):
+        print("test_create_account#1 success case")
+        response = c.post('/api/createAccount/', {'e_mail': '12333@exampe.com', 'password': 'PWd123456', 'name': 'Paul'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test_create_account#2 missing name failure")
+        response = c.post('/api/createAccount/', {'e_mail': '123@exampe.com', 'password': 'PWD1123456'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        print("test_create_account#3 email taken failure")
+        response = c.post('/api/createAccount/', {'e_mail': 'michael@example.com', 'password': 'ASD123456', 'name': 'm2'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("existing_email", response.get('reason'))
+        print("test_create_account#4 password weak failure")
+        response = c.post('/api/createAccount/', {'e_mail': 'asd@example.com', 'password': 's', 'name': 'm2'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+
+
     def test_login(self):
         print("test_login success case")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
@@ -210,13 +232,25 @@ class ApiTestCase(TestCase):
 
 class UtilsTestCase(TestCase):
     def setUp(self):
-        User.objects.create(e_mail='t@t.com', password='pwd')
+        User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
+
+    def test_pwd_filter(self):
+        print("test password filter success")
+        result = password_filter("Asd123456")
+        self.assertEqual(True, result)
+        print("test password filter length failure")
+        result = password_filter("Asd16")
+        self.assertEqual(False, result)
+        print("test password filter upper case failure")
+        result = password_filter("ssssssssd16")
+        self.assertEqual(False, result)
+
 
     def test_authenticate(self):
         print("test_authenticate success")
         u = authenticate(e_mail="t@t.com", pwd='pwd')
         self.assertEqual('t@t.com', u.e_mail)
-        self.assertEqual('pwd', u.password)
+        self.assertTrue(check_password('pwd', u.password))
         print("test_authenticate fail email")
         u = authenticate(e_mail="aaaaaa@t.com", pwd='pwd')
         self.assertEqual(None, u)
@@ -260,3 +294,4 @@ class UtilsTestCase(TestCase):
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
+
