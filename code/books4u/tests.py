@@ -12,7 +12,7 @@ import time
 
 class ApiTestCase(TestCase):
     def setUp(self):
-        User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
+        u1 = User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd')).save()
         permission = Permission.objects.create(name='Normal')
         moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
@@ -25,6 +25,8 @@ class ApiTestCase(TestCase):
         book_r.category.set([category])
         book_c = Book.objects.create(ISBN='123456789-9', name='test_book_verified', publish_date='2018-02-10', edition='1st edition', author=author, visibility=True)
         book_c.category.set([category])
+        review_a = Review.objects.create(user=u1, content='Hello Han mei mei', rating=5, book=book_c)
+        review_long = Review.objects.create(user=u1, content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me?', rating=5, book=book_c)
         
     def test_add_book(self):
         print("test_add_book success case")
@@ -293,3 +295,11 @@ class UtilsTestCase(TestCase):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
 
+    def test_get_book_by_id(self):
+        print("test_get_book_by_id")
+        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        print("get book's ")

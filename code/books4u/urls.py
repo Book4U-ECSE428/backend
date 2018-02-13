@@ -11,4 +11,5 @@ urlpatterns = [
     path('getAllBooks/', api.get_all_books),
     path('createAccount/', api.create_account),
     path('login/', api.login),
+    path('get_book_by_id,', api.get_book_by_id),
 ]
