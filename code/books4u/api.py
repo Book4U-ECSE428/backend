@@ -33,6 +33,10 @@ def get_all_books(request):
                     "name": b.name,
                     "author": b.author.name,
                     "publish_date": str(b.publish_date),
+                    "rating": "5",  # TODO: book.rating?
+                    "edition": b.edition,
+                    "publish_firm": b.publish_firm,
+
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -85,7 +89,8 @@ def create_account(request):
             response_data['status'] = 'fail'
             response_data['reason'] = 'pwd_filter_failure'
         else:
-            new_user = User(name=account_name, password=make_password(account_password), e_mail=account_e_mail, gender=account_gender, personal_intro=account_personal_intro)
+            new_user = User(name=account_name, password=make_password(account_password), e_mail=account_e_mail,
+                            gender=account_gender, personal_intro=account_personal_intro)
             new_user.save()
             if User.objects.filter(e_mail=account_e_mail).exists():
                 response_data['status'] = 'success'
