@@ -371,4 +371,28 @@ def update_comment(request):
                 response_data['status'] = 'success'
             
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-    
+
+def Vote_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    currentreview = request.POST.get('Review')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif currentreview is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no review'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['vote'] = list()
+            votemodellist = Vote.objects.filter(review=currentreview)
+            allcount=0
+            for v in votemodellist:
+                allcount=allcount+v.count
+            response_data['vote'].append(allcount)
+            response_data['status'] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
