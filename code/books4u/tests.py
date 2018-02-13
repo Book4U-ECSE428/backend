@@ -13,12 +13,10 @@ import time
 class ApiTestCase(TestCase):
     def setUp(self):
         User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
-        User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
+        User.objects.create(e_mail='t@t.com', password=make_password('pwd')).save()
         permission = Permission.objects.create(name='Normal')
-        user = User.objects.create(e_mail='t@t.com', password='pwd')
-        moderator = User.objects.create(e_mail='m@m.com', password='pwd')
+        moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
         moderator.permission.set([permission])
-        
         category = BookCategory.objects.create(name='test_category_1')
         author = Author.objects.create(name='test_author', summary='t')
         book_c = Book.objects.create(ISBN='123456789-1', name='test_book_pending', publish_date='2018-02-10', edition='1st edition', author=author)
