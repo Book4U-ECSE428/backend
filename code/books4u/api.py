@@ -43,10 +43,12 @@ def get_review_by_id(request):
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
-                    response_data['comment'].append({
+                    response_data['comments'].append({
                         'index': c.index,
                         'content': c.content,
-                        'user': c.user.name
+                        'user': c.user.name,
+                        # mock vote value
+                        'vote': 100
                     })
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
