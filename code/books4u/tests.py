@@ -23,10 +23,12 @@ class ApiTestCase(TestCase):
         book_c.category.set([category])
         book_r = Book.objects.create(ISBN='123456789-2', name='test_book_pending', publish_date='2018-02-10', edition='1st edition', author=author)
         book_r.category.set([category])
-        book_c = Book.objects.create(ISBN='123456789-9', name='test_book_verified', publish_date='2018-02-10', edition='1st edition', author=author, visibility=True)
+        book_c = Book.objects.create(ISBN='123456789-9', name='book_visible', publish_date='2018-02-10', edition='1st edition', author=author, visibility=True)
         book_c.category.set([category])
         review_a = Review.objects.create(user=u1, content='Hello Han mei mei', rating=5, book=book_c)
-        review_long = Review.objects.create(user=u1, content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me?', rating=5, book=book_c)
+        review_long = Review.objects.create(user=u1, content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me? '
+                                                             'madongmei, shenme dongmei? madongmei a, mashenme mei?'
+                                                             'xing daye ni liang kuai zhe ba, hao lei', rating=5, book=book_c)
         
     def test_add_book(self):
         print("test_add_book success case")
@@ -297,9 +299,12 @@ class UtilsTestCase(TestCase):
 
     def test_get_book_by_id(self):
         print("test_get_book_by_id")
-        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
-        print("get book's ")
+        print("get book'info")
+        response = c.post(('/api/getbookbyid', {'session_key': session_key, 'id': 3}))
+        response = response.json()
+        self.assertEqual("book_visible", response.get('book_name'))

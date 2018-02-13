@@ -29,7 +29,7 @@ def get_book_by_id(request):
             response_data["status"] = 'fail'
             response_data["reason"] = 'session expired'
         else:
-            book_id = request.POST.get('id')
+            book_id = int(request.POST.get('id'))
             if book_id is None:
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'no book id'
@@ -38,7 +38,7 @@ def get_book_by_id(request):
                     book = Book.objects.get(pk=book_id)
                 except ObjectDoesNotExist:
                     response_data['status'] = 'fail'
-                    response_data['reason'] = 'no book id'
+                    response_data['reason'] = 'does not exist'
                     return HttpResponse(json.dumps(response_data), content_type="application/json")
                 response_data['book_name'] = book.name
                 response_data['book_ISBN'] = book.ISBN
@@ -48,17 +48,15 @@ def get_book_by_id(request):
                 response_data['book_category'] = book.category.name
                 response_data['book_author'] = book.author.name
                 response_data['reviews'] = list()
-                review_list = book.review_set
+                review_list = book.review_set.all()
                 for r in review_list:
                     response_data['reviews'].append({
-                        'user': r.user,
+                        'user': r.user.name,
                         'content': r.content[:100],
                         'rating': r.rating,
+                        'id': r.id
                     })
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
-
-
 
 
 def get_all_books(request):
