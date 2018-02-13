@@ -30,6 +30,7 @@ def get_all_books(request):
             book_list = Book.objects.all()
             for b in book_list:
                 response_data["books"].append({
+                    "id": b.id,
                     "name": b.name,
                     "author": b.author.name,
                     "publish_date": str(b.publish_date),
