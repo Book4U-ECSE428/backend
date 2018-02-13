@@ -396,3 +396,4 @@ def Vote_display(request):
             response_data['vote'].append(allcount)
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+

@@ -14,4 +14,6 @@ urlpatterns = [
     path('rating_display/', api.rating_display),
     path('comments_display/', api.comments_display),
     path('update_comment/', api.update_comment),
+    path('Vote_display/', api.Vote_display),
+
 ]
