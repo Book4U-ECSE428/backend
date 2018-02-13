@@ -22,7 +22,8 @@ class ApiTestCase(TestCase):
         book_c.category.set([category])
         book_r = Book.objects.create(ISBN='123456789-2', name='test_book_pending', publish_date='2018-02-10', edition='1st edition', author=author)
         book_r.category.set([category])
-        
+        book_c = Book.objects.create(ISBN='123456789-9', name='test_book_verified', publish_date='2018-02-10', edition='1st edition', author=author, visibility=True)
+        book_c.category.set([category])
         
 
     # TODO will work on it later
@@ -78,7 +79,29 @@ class ApiTestCase(TestCase):
         self.assertEqual('missing required field', response.get('reason'))
 
     def test_get_pending_books(self):
-        pass
+        print("test_get_all_book success")
+        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/get_pending_books/', {'session_key': session_key})
+        response = response.json()
+        self.assertEqual("123456789-1", response.get("books")[0].get("ISBN"))
+        self.assertEqual("123456789-2", response.get("books")[1].get("ISBN"))
+        self.assertEqual(2,len(response.get("books")))
+        self.assertEqual("success", response.get('status'))
+        print("test_get_pending_books wrong session key")
+        response = c.post('/api/get_pending_books/', {'session_key': "aaaaaaaaa"})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('session expired', response.get('reason'))
+        print("test_get_pending_books no session key")
+        response = c.post('/api/get_pending_books/', {})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('no session key', response.get('reason'))
+        
 
     def test_commit_book(self):
         print("test_commit_book success case")

@@ -119,9 +119,12 @@ def get_pending_books(request):
             pending_books = Book.objects.filter(visibility=False)
             for book in pending_books:
                 response_data["books"].append({
+                    "ISBN": book.ISBN,
                     "name": book.name,
                     "author": book.author.name,
                     "publish_date": str(book.publish_date),
+                    "edition": book.edition,
+                    "publish_firm": book.publish_firm
                 })
             response_data["status"] = 'success'
 
