@@ -18,4 +18,5 @@ urlpatterns = [
     path('getBookByID/', api.get_book_by_id),
     path('getReviewByID/', api.get_review_by_id),
     path('addReview/', api.add_review),
+    path('getProfile/', api.get_profile),
 ]
