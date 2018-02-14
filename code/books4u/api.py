@@ -12,9 +12,46 @@ from django.core.exceptions import ObjectDoesNotExist
 
 ss = SessionStore()
 
-""" used by users to add a new book
-    visibility of the new book is false, representing not officailly added
-"""
+
+def get_review_by_id(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            review_id = int(request.POST.get('id'))
+            if review_id is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no book id'
+            else:
+                try:
+                    review = Review.objects.get(pk=review_id)
+                except ObjectDoesNotExist:
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'Object does not exist'
+                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                response_data['review_user'] = review.user.id
+                response_data['review_content'] = review.content
+                response_data['review_rating'] = review.rating
+                response_data['comments'] = list()
+                comments_list = review.comment_set.all()
+                for c in comments_list:
+                    response_data['comments'].append({
+                        'index': c.index,
+                        'content': c.content,
+                        'user': c.user.name,
+                        # mock vote value
+                        'vote': 100
+                    })
+                response_data["status"] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
 def get_book_by_id(request):
@@ -29,6 +66,7 @@ def get_book_by_id(request):
             response_data["status"] = 'fail'
             response_data["reason"] = 'session expired'
         else:
+            response_data['request_user'] = user.name
             book_id = int(request.POST.get('id'))
             if book_id is None:
                 response_data['status'] = 'fail'
@@ -56,6 +94,7 @@ def get_book_by_id(request):
                         'rating': r.rating,
                         'id': r.id
                     })
+                response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
@@ -140,10 +179,6 @@ def add_book(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
-""" get books waiting for verification
-"""
-
-
 def get_pending_books(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -177,10 +212,6 @@ def get_pending_books(request):
             response_data["status"] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
-
-""" commit a pending book by a moderator
-"""
 
 
 def commit_book(request):
@@ -225,10 +256,6 @@ def commit_book(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
-"""reject and remove a pending book by a moderator
-"""
-
-
 def reject_book(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -269,6 +296,7 @@ def reject_book(request):
             response_data["status"] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def login(request):
     response_data = dict()
