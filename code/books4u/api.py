@@ -37,9 +37,10 @@ def get_review_by_id(request):
                     response_data['status'] = 'fail'
                     response_data['reason'] = 'Object does not exist'
                     return HttpResponse(json.dumps(response_data), content_type="application/json")
-                response_data['review_user'] = review.user.id
+                response_data['review_user'] = review.user.name
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
+                response_data['book_name'] = review.book.name
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
