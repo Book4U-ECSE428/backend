@@ -368,7 +368,7 @@ def comments_display(request):
         response_data['reason'] = 'no session key'
     elif reviewid is None:
         response_data['status'] = 'fail'
-        response_data['reason'] = 'no reviewid requested'
+        response_data['reason'] = 'no reviewid'
     else:
         user = get_user_from_session_key(session_key)
         if user is None:
@@ -419,7 +419,7 @@ def update_comment(request):
             
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-def Vote_display(request):
+def vote_display(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
     reviewid = request.POST.get('id')
