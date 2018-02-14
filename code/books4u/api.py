@@ -146,6 +146,7 @@ def add_book(request):
                 ISBN_ = check_none(request.POST.get('ISBN'))
                 name_ = check_none(request.POST.get('name'))
                 publish_date_ = check_none(request.POST.get('publish_date'))
+                publish_firm_ = check_none(request.POST.get('publish_firm'))
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
@@ -168,7 +169,7 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, edition=edition_,
+            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_, edition=edition_,
                             author=author_o)
             new_book.save()
             new_book.category.set([category_o])
