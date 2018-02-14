@@ -37,9 +37,10 @@ def get_review_by_id(request):
                     response_data['status'] = 'fail'
                     response_data['reason'] = 'Object does not exist'
                     return HttpResponse(json.dumps(response_data), content_type="application/json")
-                response_data['review_user'] = review.user.id
+                response_data['review_user'] = review.user.name
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
+                response_data['book_name'] = review.book.name
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -123,10 +124,40 @@ def get_all_books(request):
                     "rating": "5",  # TODO: book.rating?
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
-
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def add_review(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            content = request.POST.get('content', "Empty")
+            rating = request.POST.get('rating')
+            if rating is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no rating'
+            else:
+                book_id = int(request.POST.get('BookID'))
+                try:
+                    book = Book.objects.get(pk=book_id)
+                except ObjectDoesNotExist:
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'Book does not exist'
+                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                response_data['status'] = 'success'
+                response_data['user'] = user.name
+                Review.objects.create(user=user, content=content, rating=rating, book=book)
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
 def add_book(request):
@@ -169,7 +200,8 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_, edition=edition_,
+            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
+                            edition=edition_,
                             author=author_o)
             new_book.save()
             new_book.category.set([category_o])
@@ -233,7 +265,7 @@ def commit_book(request):
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
-        
+
             try:
                 ISBN_ = check_none(request.POST.get('ISBN'))
             except EmptyInputError:
@@ -275,7 +307,7 @@ def reject_book(request):
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
-            
+
             try:
                 ISBN_ = check_none(request.POST.get('ISBN'))
             except EmptyInputError:
@@ -380,13 +412,14 @@ def rating_display(request):
             review_list = Review.objects.filter(book=b)
             for r in review_list:
                 response_data['reviews'].append({
-                    "user":r.user.name,
+                    "user": r.user.name,
                     "content": r.content,
                     "rating": r.rating,
                 })
             response_data['status'] = 'success'
-            
+
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def comments_display(request):
     response_data = dict()
@@ -405,7 +438,7 @@ def comments_display(request):
             response_data['reason'] = 'session expired'
         else:
             response_data['comments'] = list()
-            currentreview= Review.objects.get(id=reviewid)
+            currentreview = Review.objects.get(id=reviewid)
             comment_list = Comment.objects.filter(review=currentreview)
             for c in comment_list:
                 response_data['comments'].append({
@@ -416,39 +449,38 @@ def comments_display(request):
             response_data['status'] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-"""
-def update_comment(request):
+
+
+def add_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
-    reviewid = request.POST.get('id')
-    new_content = request.POST.get('content')
     if session_key is None:
         response_data['status'] = 'fail'
         response_data['reason'] = 'no session key'
-    elif reviewid is None:
-        response_data['status'] = 'fail'
-        response_data['reason'] = 'no reviewid '
     else:
-        logged_user = get_user_from_session_key(session_key)
-        if logged_user is None:
-            response_data['status'] = 'fail'
-            response_data['reason'] = 'session expired'
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
         else:
-
+            content = request.POST.get('content')
+            review_id = int(request.POST.get('id'))
             try:
-                currentreview = Review.objects.get(id=reviewid)
-                commentlist= Comment.objects.filter(review=currentreview)
-                comment=commentlist.filter(user = logged_user)
-            except:
+                review = Review.objects.get(pk=review_id)
+            except ObjectDoesNotExist:
                 response_data['status'] = 'fail'
-                response_data['reason'] = 'comment does not exist'
+                response_data['reason'] = 'Review does not exist'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+            response_data['user'] = user.name
+            if content == '':
+                response_data['status'] = 'fail'
             else:
-                comment.content = new_content
-                comment.save()
                 response_data['status'] = 'success'
-            
+                Comment.objects.create(index=0, review=review, user=user, content=content)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-"""
+
+
 def vote_display(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -468,10 +500,9 @@ def vote_display(request):
             response_data['vote'] = list()
             currentreview = Review.objects.get(id=reviewid)
             votemodellist = Vote.objects.filter(review=currentreview)
-            allcount=0
+            allcount = 0
             for v in votemodellist:
-                allcount=allcount+v.count
+                allcount = allcount + v.count
             response_data['vote'].append(allcount)
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
