@@ -123,10 +123,42 @@ def get_all_books(request):
                     "rating": "5",  # TODO: book.rating?
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
-
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def add_review(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            content = request.POST.get('content', "Empty")
+            rating = request.POST.get('rating')
+            if rating is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no rating'
+            else:
+                book_id = int(request.POST.get('BookID'))
+                try:
+                    book = Book.objects.get(pk=book_id)
+                except ObjectDoesNotExist:
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'Book does not exist'
+                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                response_data['status'] = 'success'
+                response_data['user'] = user
+                response_data['content'] = content
+                response_data['book'] = book
+                response_data['rating'] = rating
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
 def add_book(request):
