@@ -33,6 +33,7 @@ class ApiTestCase(TestCase):
                                             content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me? '
                                                     'madongmei, shenme dongmei? madongmei a, mashenme mei?'
                                                     'xing daye ni liang kuai zhe ba, hao lei', rating=5, book=book_c)
+        comment_a= Comment.objects.create(index=1,review=review_a,user=u1,content='comment!!!!',id=10011)
 
     def test_add_book(self):
         print("test_add_book success case")
@@ -312,7 +313,59 @@ class ApiTestCase(TestCase):
        self.assertEqual("fail", response.get('status'))
        self.assertEqual('no reviewid', response.get('reason'))
 
+    def test_vote_display(self):
+       print("test_vote_display#1 success case")
+       response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       session_key = response.get('session_key')
+       self.assertEqual(True, len(session_key) > 1)
+       response = c.post('/api/vote_display/', {'session_key':session_key,'id':1001})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       print("test_vote_display#2 wrong session key")
+       response = c.post('/api/vote_display/', {'session_key': 'dfasfsadfasfsadfsaf', 'id':1001})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('session expired', response.get('reason'))
+       print("test_vote_display#3 no session key")
+       response = c.post('/api/vote_display/', {'id':1001})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('no session key', response.get('reason'))
+       print("test_vote_display#4 no review")
+       response = c.post('/api/vote_display/', {'session_key': session_key})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('no reviewid', response.get('reason'))
 
+"""
+    def test_update_comment(self):
+       print("test_update_comment#1 success case")
+       response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       session_key = response.get('session_key')
+       self.assertEqual(True, len(session_key) > 1)
+       response = c.post('/api/update_comment/', {'session_key':session_key,'id':1001,'content':'miaomiaomiao'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       print("test_update_comment#2 wrong session key")
+       response = c.post('/api/update_comment/', {'session_key': 'dfasfsadfasfsadfsaf', 'id':1001,'content':'miaomiaomiao'})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('session expired', response.get('reason'))
+       print("test_update_comment#3 no session key")
+       response = c.post('/api/update_comment/', {'id':1001,'content':'miaomiaomiao'})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('no session key', response.get('reason'))
+       print("test_update_comment#4 no review")
+       response = c.post('/api/update_comment/', {'session_key': session_key,'content':'miaomiaomiao'})
+       response = response.json()
+       self.assertEqual("fail", response.get('status'))
+       self.assertEqual('no reviewid', response.get('reason'))
+"""
 
 class UtilsTestCase(TestCase):
     def setUp(self):

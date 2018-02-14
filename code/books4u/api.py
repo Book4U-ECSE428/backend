@@ -408,7 +408,8 @@ def update_comment(request):
 
             try:
                 currentreview = Review.objects.get(id=reviewid)
-                comment = Comment.objects.get(review=currentreview, user=logged_user)
+                commentlist= Comment.objects.filter(review=currentreview)
+                comment=commentlist.filter(user = logged_user)
             except:
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'comment does not exist'
