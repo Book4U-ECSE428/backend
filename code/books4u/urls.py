@@ -13,7 +13,7 @@ urlpatterns = [
     path('login/', api.login),
     path('rating_display/', api.rating_display),
     path('comments_display/', api.comments_display),
-   # path('update_comment/', api.update_comment),
+    path('addComment/', api.add_comment),
     path('vote_display/', api.vote_display),
     path('getBookByID/', api.get_book_by_id),
     path('getReviewByID/', api.get_review_by_id),
