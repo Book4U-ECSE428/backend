@@ -33,6 +33,9 @@ class ApiTestCase(TestCase):
                                             content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me? '
                                                     'madongmei, shenme dongmei? madongmei a, mashenme mei?'
                                                     'xing daye ni liang kuai zhe ba, hao lei', rating=5, book=book_c)
+        review_b = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=101)
+        comment_a = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
+
 
     def test_add_book(self):
         print("test_add_book success case")
@@ -257,6 +260,18 @@ class ApiTestCase(TestCase):
         response = c.post('/api/getBookByID/', {'session_key': session_key, 'id': 100})
         response = response.json()
         self.assertEqual("book_visible", response.get('book_name'))
+
+    def test_get_review_by_id(self):
+        print("test_get_review_by_id")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        print("get review info")
+        response = c.post('/api/getReviewByID/', {'session_key': session_key, 'id': 101})
+        response = response.json()
+        self.assertEqual("verygood", response.get('review_content'))
 
 
 class UtilsTestCase(TestCase):
