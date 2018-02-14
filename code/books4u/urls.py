@@ -16,5 +16,5 @@ urlpatterns = [
     path('update_comment/', api.update_comment),
     path('vote_display/', api.vote_display),
     path('getBookByID/', api.get_book_by_id),
-
+    path('getReviewByID/', api.get_review_by_id),
 ]
