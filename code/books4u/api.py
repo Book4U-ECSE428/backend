@@ -178,6 +178,7 @@ def add_book(request):
                 ISBN_ = check_none(request.POST.get('ISBN'))
                 name_ = check_none(request.POST.get('name'))
                 publish_date_ = check_none(request.POST.get('publish_date'))
+                publish_firm_ = check_none(request.POST.get('publish_firm'))
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
@@ -200,7 +201,7 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, edition=edition_,
+            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_, edition=edition_,
                             author=author_o)
             new_book.save()
             new_book.category.set([category_o])
@@ -388,3 +389,121 @@ def create_account(request):
         response_data['status'] = 'fail'
         response_data['reason'] = 'request_method'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def rating_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    bookid = request.POST.get('id')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif bookid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no bookid key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['reviews'] = list()
+            b = Book.objects.get(id=bookid)
+            review_list = Review.objects.filter(book=b)
+            for r in review_list:
+                response_data['reviews'].append({
+                    "user":r.user.name,
+                    "content": r.content,
+                    "rating": r.rating,
+                })
+            response_data['status'] = 'success'
+            
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def comments_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    reviewid = request.POST.get('id')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif reviewid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no reviewid'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['comments'] = list()
+            currentreview= Review.objects.get(id=reviewid)
+            comment_list = Comment.objects.filter(review=currentreview)
+            for c in comment_list:
+                response_data['comments'].append({
+                    "user": c.user.name,
+                    "content": c.content,
+                    "index": c.index,
+                })
+            response_data['status'] = 'success'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+"""
+def update_comment(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    reviewid = request.POST.get('id')
+    new_content = request.POST.get('content')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif reviewid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no reviewid '
+    else:
+        logged_user = get_user_from_session_key(session_key)
+        if logged_user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+
+            try:
+                currentreview = Review.objects.get(id=reviewid)
+                commentlist= Comment.objects.filter(review=currentreview)
+                comment=commentlist.filter(user = logged_user)
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'comment does not exist'
+            else:
+                comment.content = new_content
+                comment.save()
+                response_data['status'] = 'success'
+            
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+"""
+def vote_display(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    reviewid = request.POST.get('id')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif reviewid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no reviewid'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            response_data['vote'] = list()
+            currentreview = Review.objects.get(id=reviewid)
+            votemodellist = Vote.objects.filter(review=currentreview)
+            allcount=0
+            for v in votemodellist:
+                allcount=allcount+v.count
+            response_data['vote'].append(allcount)
+            response_data['status'] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
