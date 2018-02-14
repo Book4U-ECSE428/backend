@@ -258,36 +258,37 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("book_visible", response.get('book_name'))
 
+
+def test_rating_display(self):
+    print("test_rating_display#1 success case")
+    response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+    response = response.json()
+    self.assertEqual("success", response.get('status'))
+    session_key = response.get('session_key')
+    self.assertEqual(True, len(session_key) > 1)
+    response = c.post('/api/rating_display/', {'session_key': session_key, 'id': 100})
+    response = response.json()
+    self.assertEqual("success", response.get('status'))
+
+    print("test_rating_display#2 wrong session key")
+    response = c.post('/api/rating_display/', {'session_key': 'dfasfsadfasfsadfsaf', 'id': 100})
+    response = response.json()
+    self.assertEqual("fail", response.get('status'))
+    self.assertEqual('session expired', response.get('reason'))
+
+    print("test_rating_display#3 no session key")
+    response = c.post('/api/rating_display/', {'id': 100})
+    response = response.json()
+    self.assertEqual("fail", response.get('status'))
+    self.assertEqual('no session key', response.get('reason'))
+
+    print("test_rating_display#4 no ISBN key")
+    response = c.post('/api/rating_display/', {'session_key': session_key})
+    response = response.json()
+    self.assertEqual("fail", response.get('status'))
+    self.assertEqual('no ISBN key', response.get('reason'))
+
 """
-   def test_rating_display(self):
-       print("test_rating_display#1 success case")
-       response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
-       response = response.json()
-       self.assertEqual("success", response.get('status'))
-       session_key = response.get('session_key')
-       self.assertEqual(True, len(session_key) > 1)
-       response = c.post('/api/rating_display/', {'session_key':session_key,'ISBN':'1231232131231'})
-       response = response.json()
-       self.assertEqual("success", response.get('status'))
-
-       print("test_rating_display#2 wrong session key")
-       response = c.post('/api/rating_display/', {'session_key': 'dfasfsadfasfsadfsaf', 'ISBN': '1231232131231'})
-       response = response.json()
-       self.assertEqual("fail", response.get('status'))
-       self.assertEqual('session expired', response.get('reason'))
-
-       print("test_rating_display#3 no session key")
-       response = c.post('/api/rating_display/', {'ISBN': '1231232131231'})
-       response = response.json()
-       self.assertEqual("fail", response.get('status'))
-       self.assertEqual('no session key', response.get('reason'))
-
-       print("test_rating_display#4 no ISBN key")
-       response = c.post('/api/rating_display/', {'session_key': session_key})
-       response = response.json()
-       self.assertEqual("fail", response.get('status'))
-       self.assertEqual('no ISBN key', response.get('reason'))
-
     def test_Comments_display(self):
        print("test_Comments_display#1 success case")
        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
