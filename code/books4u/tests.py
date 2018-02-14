@@ -36,7 +36,7 @@ class ApiTestCase(TestCase):
 
         comment_a= Comment.objects.create(index=1,review=review_a,user=u1,content='comment!!!!',id=10011)
         review_b = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=101)
-        comment_a = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
+        comment_b = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
 
     def test_add_book(self):
         print("test_add_book success case")

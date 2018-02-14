@@ -416,7 +416,7 @@ def comments_display(request):
             response_data['status'] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
+"""
 def update_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -448,7 +448,7 @@ def update_comment(request):
                 response_data['status'] = 'success'
             
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
+"""
 def vote_display(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
