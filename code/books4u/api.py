@@ -506,3 +506,32 @@ def vote_display(request):
             response_data['vote'].append(allcount)
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def edit_comment(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    commentid = request.POST.get('id')
+    new_content = request.POST.get('content')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif commentid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no commentid'
+    else:
+        current_user = get_user_from_session_key(session_key)
+        if current_user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            try:
+                comment = Comment.objects.get(id=commentid, user=current_user)
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'illegal user'
+            else:
+                comment.content = new_content
+                comment.save()
+                response_data['status'] = 'success'
+            
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
