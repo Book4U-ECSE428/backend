@@ -48,6 +48,7 @@ def get_review_by_id(request):
                         'index': c.index,
                         'content': c.content,
                         'user': c.user.name,
+                        'id': c.id,
                         # mock vote value
                         'vote': 100
                     })
