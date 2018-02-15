@@ -445,6 +445,7 @@ def comments_display(request):
                     "user": c.user.name,
                     "content": c.content,
                     "index": c.index,
+                    "id": c.id,
                 })
             response_data['status'] = 'success'
 
