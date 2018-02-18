@@ -91,7 +91,7 @@ def get_book_by_id(request):
                 for r in review_list:
                     response_data['reviews'].append({
                         'user': r.user.name,
-                        'content': r.content,
+                        'content': r.content[:100],
                         'rating': r.rating,
                         'id': r.id
                     })
