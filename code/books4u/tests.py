@@ -74,14 +74,13 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
-        # FIXME
-        # print("test_add_book missing field : publish_date")
-        # response = c.post('/api/add_book/',
-        #                   {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'publish_firm':'test_firm',
-        #                    'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
-        # response = response.json()
-        # self.assertEqual("fail", response.get('status'))
-        # self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : publish_date")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : publish_firm")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'',
