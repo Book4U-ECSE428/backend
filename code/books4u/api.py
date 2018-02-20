@@ -177,7 +177,7 @@ def add_book(request):
             try:
                 ISBN_ = check_none(request.POST.get('ISBN'))
                 name_ = check_none(request.POST.get('name'))
-                publish_date_ = check_none(request.POST.get('publish_date'))
+                publish_date_ = '2018-02-15'  # request.POST.get('publish_date'))# TODO: hack for sprint 1 demo. need fix
                 publish_firm_ = check_none(request.POST.get('publish_firm'))
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
