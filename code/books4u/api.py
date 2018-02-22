@@ -182,6 +182,7 @@ def add_book(request):
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
+                cover_image_="..."
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'
@@ -203,7 +204,7 @@ def add_book(request):
 
             new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
                             edition=edition_,
-                            author=author_o)
+                            author=author_o, cover_image=cover_image_)
             new_book.save()
             new_book.category.set([category_o])
 
