@@ -47,7 +47,7 @@ class ApiTestCase(TestCase):
         self.assertEqual(True, len(session_key) > 1)
         response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book',
                                              'publish_date': '2018-02-10', 'publish_firm':'test_firm','edition': '1st edition',
-                                             'category': 'test_category', 'author': 'test_author'})
+                                             'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         print("test_add_book wrong session key")
