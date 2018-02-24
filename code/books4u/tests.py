@@ -70,42 +70,42 @@ class ApiTestCase(TestCase):
         print("test_add_book missing field : name")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': '', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : publish_date")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : publish_firm")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : edition")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : category")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': '', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': '', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
         print("test_add_book missing field : author")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10',  'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': ''})
+                           'edition': '1st edition', 'category': 'test_category', 'author': '','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
