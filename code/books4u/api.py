@@ -126,6 +126,7 @@ def get_all_books(request):
                     "rating": "5",  # TODO: book.rating?
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
+                    "cover_image": b.cover_image,
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -183,7 +184,7 @@ def add_book(request):
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
-                cover_image_="..."
+                cover_image_=  check_none(request.POST.get('cover_image'))
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'

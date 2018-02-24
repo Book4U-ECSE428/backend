@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='book',
             name='cover_image',
-            field=models.TextField(default=''),
+            field=models.TextField(default='https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'),
             preserve_default=False,
         ),
     ]
