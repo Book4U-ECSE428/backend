@@ -87,6 +87,7 @@ def get_book_by_id(request):
                 response_data['book_edition'] = book.edition
                 response_data['book_category'] = book.category.name
                 response_data['book_author'] = book.author.name
+                response_data['cover_image'] = book.cover_image
                 response_data['reviews'] = list()
                 review_list = book.review_set.all()
                 for r in review_list:
@@ -183,7 +184,7 @@ def add_book(request):
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
-                cover_image_=  check_none(request.POST.get('cover_image'))
+                cover_image_ = check_none(request.POST.get('cover_image'))
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'
@@ -511,6 +512,7 @@ def vote_display(request):
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+
 def edit_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -537,5 +539,5 @@ def edit_comment(request):
                 comment.content = new_content
                 comment.save()
                 response_data['status'] = 'success'
-            
+
     return HttpResponse(json.dumps(response_data), content_type="application/json")
