@@ -341,6 +341,10 @@ def login(request):
     if None not in (u_email, u_pwd):
         user = authenticate(e_mail=u_email, pwd=u_pwd)
         if user is not None:
+            if len(user.permission.filter(name='BLOCK_USER')) != 0:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'permission denied'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
             if is_logged_in(user):
                 key = get_session_key_from_user(user)
             else:
