@@ -14,10 +14,10 @@ class ApiTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd')).save()
-        permission_n = Permission.objects.create(name='Normal')
-        permission_b = Permission.objects.create(name='BLOCK_USER')
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
-        moderator.permission.set([permission_n])
+        moderator.permission.set([permission_m])
         banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
         banned_user.permission.set([permission_b])
         

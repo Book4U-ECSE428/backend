@@ -229,7 +229,7 @@ def get_pending_books(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -264,7 +264,7 @@ def commit_book(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -306,7 +306,7 @@ def reject_book(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -341,7 +341,7 @@ def login(request):
     if None not in (u_email, u_pwd):
         user = authenticate(e_mail=u_email, pwd=u_pwd)
         if user is not None:
-            if len(user.permission.filter(name='BLOCK_USER')) != 0:
+            if len(user.permission.filter(name='banned')) != 0:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
