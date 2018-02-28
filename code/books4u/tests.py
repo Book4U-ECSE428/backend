@@ -419,7 +419,13 @@ class ApiTestCase(TestCase):
 
 class UtilsTestCase(TestCase):
     def setUp(self):
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
+        moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
+        moderator.permission.set([permission_m])
+        banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
+        banned_user.permission.set([permission_b])
 
     def test_pwd_filter(self):
         print("test password filter success")
@@ -480,3 +486,9 @@ class UtilsTestCase(TestCase):
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
+
+    def test_get_user_permission_type(self):
+        print("test_get_user_permission_type")
+        self.assertEqual('Normal user',get_user_permission_type(User.objects.get(e_mail='t@t.com')))
+        self.assertEqual('Banned user',get_user_permission_type(User.objects.get(e_mail='b@b.com')))
+        self.assertEqual('Moderator',get_user_permission_type(User.objects.get(e_mail='m@m.com')))
