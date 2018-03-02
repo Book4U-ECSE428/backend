@@ -77,3 +77,10 @@ def get_user_from_session_key(session_key):
     else:
         return User.objects.filter(pk=session[0].get_decoded().get('user_id'))[0]
 
+def get_user_permission_type(user):
+    if len(user.permission.filter(name='banned')) != 0:
+        return 'Banned user'
+    if len(user.permission.filter(name='moderator')) != 0:
+        return 'Moderator'
+    return 'Normal user'
+
