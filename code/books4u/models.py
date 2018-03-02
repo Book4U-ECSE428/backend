@@ -65,6 +65,7 @@ class Book(models.Model):
     visibility = models.BooleanField(default=False)
     category = models.ManyToManyField(BookCategory)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    cover_image=models.TextField()
 
     def __str__(self):
         return self.name

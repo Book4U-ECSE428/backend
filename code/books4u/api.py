@@ -70,6 +70,7 @@ def get_review_by_id(request):
                         'index': c.index,
                         'content': c.content,
                         'user': c.user.name,
+                        'id': c.id,
                         # mock vote value
                         'vote': 100
                     })
@@ -203,6 +204,7 @@ def add_book(request):
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
+                cover_image_="..."
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'
@@ -224,7 +226,7 @@ def add_book(request):
 
             new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
                             edition=edition_,
-                            author=author_o)
+                            author=author_o, cover_image=cover_image_)
             new_book.save()
             new_book.category.set([category_o])
 
@@ -467,6 +469,7 @@ def comments_display(request):
                     "user": c.user.name,
                     "content": c.content,
                     "index": c.index,
+                    "id": c.id,
                 })
             response_data['status'] = 'success'
 
@@ -527,4 +530,33 @@ def vote_display(request):
                 allcount = allcount + v.count
             response_data['vote'].append(allcount)
             response_data['status'] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def edit_comment(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    commentid = request.POST.get('id')
+    new_content = request.POST.get('content')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif commentid is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no commentid'
+    else:
+        current_user = get_user_from_session_key(session_key)
+        if current_user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            try:
+                comment = Comment.objects.get(id=commentid, user=current_user)
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'illegal user'
+            else:
+                comment.content = new_content
+                comment.save()
+                response_data['status'] = 'success'
+            
     return HttpResponse(json.dumps(response_data), content_type="application/json")
