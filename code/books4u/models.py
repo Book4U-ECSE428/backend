@@ -17,8 +17,8 @@ GENDER_CHOICES = (
 )
 
 PERMISSION_CHOICES = (
-    ("BLOCK_USER", 'BLOCK_USER'),
-    ("Normal", 'Normal'),
+    ("banned", 'banned'),
+    ("moderator",'moderator'),
 )
 
 

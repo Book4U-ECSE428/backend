@@ -14,9 +14,13 @@ class ApiTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd')).save()
-        permission = Permission.objects.create(name='Normal')
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
-        moderator.permission.set([permission])
+        moderator.permission.set([permission_m])
+        banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
+        banned_user.permission.set([permission_b])
+        
         category = BookCategory.objects.create(name='test_category_1')
         author = Author.objects.create(name='test_author', summary='t')
         book_c = Book.objects.create(ISBN='123456789-1', name='test_book_pending', publish_date='2018-02-10', publish_firm='test_firm',
@@ -242,6 +246,12 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("no such user", response.get('reason'))
+        Session.objects.all()[0].delete()
+        print("test_login blocked user")
+        response = c.post('/api/login/', {'e_mail': 'b@b.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("permission denied", response.get('reason'))
 
     def test_get_all_book(self):
         print("test_get_all_book success")
@@ -409,7 +419,13 @@ class ApiTestCase(TestCase):
 
 class UtilsTestCase(TestCase):
     def setUp(self):
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
+        moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
+        moderator.permission.set([permission_m])
+        banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
+        banned_user.permission.set([permission_b])
 
     def test_pwd_filter(self):
         print("test password filter success")
@@ -470,3 +486,9 @@ class UtilsTestCase(TestCase):
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
+
+    def test_get_user_permission_type(self):
+        print("test_get_user_permission_type")
+        self.assertEqual('Normal user',get_user_permission_type(User.objects.get(e_mail='t@t.com')))
+        self.assertEqual('Banned user',get_user_permission_type(User.objects.get(e_mail='b@b.com')))
+        self.assertEqual('Moderator',get_user_permission_type(User.objects.get(e_mail='m@m.com')))
