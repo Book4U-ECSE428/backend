@@ -49,7 +49,7 @@ class ApiTestCase(TestCase):
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
-        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book',
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-8', 'name': 'test_book',
                                              'publish_date': '2018-02-10', 'publish_firm':'test_firm','edition': '1st edition',
                                              'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
@@ -64,6 +64,7 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('no session key', response.get('reason'))
+        
         print("test_add_book missing field : ISBN")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
@@ -120,7 +121,30 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
-
+        print("test_add_book missing field : publish_date")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        
+        print("test_add_book existed book")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-9', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('already existed', response.get('reason'))
+        
+        print("test_add_book invalid date : publish_date")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': 'yahaha', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        self.assertEqual('0001-01-01', str(Book.objects.get(ISBN='123456789-0').publish_date))
+        
     def test_get_pending_books(self):
         print("test_get_all_book success")
         response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})

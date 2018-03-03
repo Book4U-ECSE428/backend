@@ -3,12 +3,13 @@ from django.http import HttpResponse
 from django.contrib import auth
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
+from django.db import transaction
 from datetime import datetime, timedelta
 import json
 from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist,ValidationError
 
 ss = SessionStore()
 
@@ -190,6 +191,12 @@ def add_book(request):
                 response_data["reason"] = 'missing required field'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+            # check if the input book exists
+            if len(Book.objects.filter(ISBN=ISBN_)) == 1:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'already existed'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
             # check if the input category exists
             try:
                 category_o = BookCategory.objects.get(name=author_)
@@ -204,10 +211,17 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
+            try:
+                with transaction.atomic():
+                    new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
                             edition=edition_,
                             author=author_o, cover_image=cover_image_)
-            new_book.save()
+                    new_book.save()
+            except ValidationError:
+                new_book = Book(ISBN=ISBN_, name=name_, publish_date='0001-01-01', publish_firm=publish_firm_,
+                            edition=edition_,
+                            author=author_o, cover_image=cover_image_)
+                new_book.save()
             new_book.category.set([category_o])
 
             response_data["status"] = 'success'
