@@ -13,6 +13,28 @@ from django.core.exceptions import ObjectDoesNotExist
 ss = SessionStore()
 
 
+def get_profile(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['name'] = user.name
+            response_data['password'] = user.password
+            response_data['e_mail'] = user.e_mail
+            response_data['gender'] = user.gender
+            response_data['personal_intro'] = get_user_permission_type(user)
+            response_data['permission'] = user.permission.name
+            response_data['status'] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def get_review_by_id(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
