@@ -27,6 +27,7 @@ def get_profile(request):
             response_data["reason"] = 'session expired'
         else:
             response_data['user'] = user.name
+            response_data['name'] = user.name
             response_data['password'] = user.password
             response_data['e_mail'] = user.e_mail
             response_data['gender'] = user.gender
