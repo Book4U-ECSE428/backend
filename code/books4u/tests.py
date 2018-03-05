@@ -14,9 +14,13 @@ class ApiTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd')).save()
-        permission = Permission.objects.create(name='Normal')
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
-        moderator.permission.set([permission])
+        moderator.permission.set([permission_m])
+        banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
+        banned_user.permission.set([permission_b])
+        
         category = BookCategory.objects.create(name='test_category_1')
         author = Author.objects.create(name='test_author', summary='t')
         book_c = Book.objects.create(ISBN='123456789-1', name='test_book_pending', publish_date='2018-02-10', publish_firm='test_firm',
@@ -37,6 +41,7 @@ class ApiTestCase(TestCase):
         comment_a= Comment.objects.create(index=1,review=review_a,user=u1,content='comment!!!!',id=10011)
         review_b = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=101)
         comment_b = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
+        review_c = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=999)
 
     def test_add_book(self):
         print("test_add_book success case")
@@ -45,9 +50,9 @@ class ApiTestCase(TestCase):
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
-        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book',
+        response = c.post('/api/add_book/', {'session_key': session_key, 'ISBN': '123456789-8', 'name': 'test_book',
                                              'publish_date': '2018-02-10', 'publish_firm':'test_firm','edition': '1st edition',
-                                             'category': 'test_category', 'author': 'test_author'})
+                                             'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         print("test_add_book wrong session key")
@@ -60,6 +65,7 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('no session key', response.get('reason'))
+        
         print("test_add_book missing field : ISBN")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
@@ -70,7 +76,49 @@ class ApiTestCase(TestCase):
         print("test_add_book missing field : name")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': '', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : publish_date")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : publish_firm")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : edition")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10', 'publish_firm':'test_firm',
+                           'edition': '', 'category': 'test_category', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : category")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': '', 'author': 'test_author','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : author")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10',  'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': '','cover_image':'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('missing required field', response.get('reason'))
+        print("test_add_book missing field : cover_image")
+        response = c.post('/api/add_book/',
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10',  'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': '','cover_image':''})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
@@ -81,35 +129,23 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('missing required field', response.get('reason'))
-        print("test_add_book missing field : publish_firm")
+        
+        print("test_add_book existed book")
         response = c.post('/api/add_book/',
-                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                          {'session_key': session_key, 'ISBN': '123456789-9', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'aaa'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
-        self.assertEqual('missing required field', response.get('reason'))
-        print("test_add_book missing field : edition")
+        self.assertEqual('already existed', response.get('reason'))
+        
+        print("test_add_book invalid date : publish_date")
         response = c.post('/api/add_book/',
-                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '', 'category': 'test_category', 'author': 'test_author'})
+                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': 'yahaha', 'publish_firm':'test_firm',
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'aaa'})
         response = response.json()
-        self.assertEqual("fail", response.get('status'))
-        self.assertEqual('missing required field', response.get('reason'))
-        print("test_add_book missing field : category")
-        response = c.post('/api/add_book/',
-                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': '', 'author': 'test_author'})
-        response = response.json()
-        self.assertEqual("fail", response.get('status'))
-        self.assertEqual('missing required field', response.get('reason'))
-        print("test_add_book missing field : author")
-        response = c.post('/api/add_book/',
-                          {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book','publish_date': '2018-02-10',  'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': ''})
-        response = response.json()
-        self.assertEqual("fail", response.get('status'))
-        self.assertEqual('missing required field', response.get('reason'))
-
+        self.assertEqual("success", response.get('status'))
+        self.assertEqual('0001-01-01', str(Book.objects.get(ISBN='123456789-0').publish_date))
+        
     def test_get_pending_books(self):
         print("test_get_all_book success")
         response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
@@ -235,6 +271,12 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("no such user", response.get('reason'))
+        Session.objects.all()[0].delete()
+        print("test_login blocked user")
+        response = c.post('/api/login/', {'e_mail': 'b@b.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("permission denied", response.get('reason'))
 
     def test_get_all_book(self):
         print("test_get_all_book success")
@@ -399,10 +441,26 @@ class ApiTestCase(TestCase):
        self.assertEqual("fail", response.get('status'))
        self.assertEqual('illegal user', response.get('reason'))
 
+    def test_delete_review(self):
+       print("test_delete_review success")
+       response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       session_key = response.get('session_key')
+       self.assertEqual(True, len(session_key) > 1)
+       response = c.post('/api/deleteReviewByID/', {'session_key':session_key,'id':999})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
 
 class UtilsTestCase(TestCase):
     def setUp(self):
+        permission_m = Permission.objects.create(name='moderator')
+        permission_b = Permission.objects.create(name='banned')
         User.objects.create(e_mail='t@t.com', password=make_password('pwd'))
+        moderator = User.objects.create(e_mail='m@m.com', password=make_password('pwd'))
+        moderator.permission.set([permission_m])
+        banned_user = User.objects.create(e_mail='b@b.com', password=make_password('pwd'))
+        banned_user.permission.set([permission_b])
 
     def test_pwd_filter(self):
         print("test password filter success")
@@ -463,3 +521,9 @@ class UtilsTestCase(TestCase):
         for i in range(0, 100):
             session = Session.objects.get(session_key=session_key)
             self.assertFalse(is_session_expired(session))
+
+    def test_get_user_permission_type(self):
+        print("test_get_user_permission_type")
+        self.assertEqual('Normal user',get_user_permission_type(User.objects.get(e_mail='t@t.com')))
+        self.assertEqual('Banned user',get_user_permission_type(User.objects.get(e_mail='b@b.com')))
+        self.assertEqual('Moderator',get_user_permission_type(User.objects.get(e_mail='m@m.com')))
