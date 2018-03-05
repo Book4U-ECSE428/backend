@@ -42,6 +42,7 @@ def get_review_by_id(request):
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
+                response_data['author'] = review.user.e_mail
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -96,7 +97,8 @@ def get_book_by_id(request):
                         'user': r.user.name,
                         'content': r.content[:100],
                         'rating': r.rating,
-                        'id': r.id
+                        'id': r.id,
+                        'author': r.user.e_mail
                     })
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")

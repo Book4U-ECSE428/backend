@@ -132,7 +132,7 @@ class ApiTestCase(TestCase):
         print("test_add_book existed book")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-9', 'name': 'test_book', 'publish_date': '2018-02-10', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'aaa'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('already existed', response.get('reason'))
@@ -140,7 +140,7 @@ class ApiTestCase(TestCase):
         print("test_add_book invalid date : publish_date")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book', 'publish_date': 'yahaha', 'publish_firm':'test_firm',
-                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author'})
+                           'edition': '1st edition', 'category': 'test_category', 'author': 'test_author','cover_image':'aaa'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         self.assertEqual('0001-01-01', str(Book.objects.get(ISBN='123456789-0').publish_date))
