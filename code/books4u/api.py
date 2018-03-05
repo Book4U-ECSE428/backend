@@ -29,8 +29,8 @@ def get_profile(request):
             response_data['password'] = user.password
             response_data['e_mail'] = user.e_mail
             response_data['gender'] = user.gender
-            response_data['personal_intro'] = get_user_permission_type(user)
-            response_data['permission'] = user.permission.name
+            response_data['personal_intro'] = user.personal_intro
+            response_data['permission'] = get_user_permission_type(user)
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
