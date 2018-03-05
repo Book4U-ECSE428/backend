@@ -9,7 +9,7 @@ import json
 from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
-from django.core.exceptions import ObjectDoesNotExist,ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 ss = SessionStore()
 
@@ -26,15 +26,15 @@ def get_profile(request):
             response_data["status"] = 'fail'
             response_data["reason"] = 'session expired'
         else:
+            response_data['user'] = user.name
             response_data['name'] = user.name
             response_data['password'] = user.password
             response_data['e_mail'] = user.e_mail
             response_data['gender'] = user.gender
-            response_data['personal_intro'] = get_user_permission_type(user)
-            response_data['permission'] = user.permission.name
+            response_data['personal_intro'] = user.personal_intro
+            response_data['permission'] = get_user_permission_type(user)
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
 
 def get_review_by_id(request):
     response_data = dict()
@@ -64,6 +64,7 @@ def get_review_by_id(request):
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
+                response_data['author'] = review.user.e_mail
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -118,7 +119,8 @@ def get_book_by_id(request):
                         'user': r.user.name,
                         'content': r.content[:100],
                         'rating': r.rating,
-                        'id': r.id
+                        'id': r.id,
+                        'author': r.user.e_mail
                     })
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -236,13 +238,13 @@ def add_book(request):
             try:
                 with transaction.atomic():
                     new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
-                            edition=edition_,
-                            author=author_o, cover_image=cover_image_)
+                                    edition=edition_,
+                                    author=author_o, cover_image=cover_image_)
                     new_book.save()
             except ValidationError:
                 new_book = Book(ISBN=ISBN_, name=name_, publish_date='0001-01-01', publish_firm=publish_firm_,
-                            edition=edition_,
-                            author=author_o, cover_image=cover_image_)
+                                edition=edition_,
+                                author=author_o, cover_image=cover_image_)
                 new_book.save()
             new_book.category.set([category_o])
 
@@ -578,6 +580,31 @@ def edit_comment(request):
             else:
                 comment.content = new_content
                 comment.save()
+                response_data['status'] = 'success'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def delete_review_by_id(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    id = request.POST.get('id')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        current_user = get_user_from_session_key(session_key)
+        if current_user is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'session expired'
+        else:
+            try:
+                review = Review.objects.get(id=id)
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'illegal user'
+            else:
+                review.delete()
                 response_data['status'] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")

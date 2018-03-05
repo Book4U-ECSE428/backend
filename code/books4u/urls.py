@@ -20,4 +20,5 @@ urlpatterns = [
     path('addReview/', api.add_review),
     path('getProfile/', api.get_profile),
     path('edit_comment/', api.edit_comment),
+    path('deleteReviewByID/', api.delete_review_by_id),
 ]
