@@ -41,6 +41,7 @@ class ApiTestCase(TestCase):
         comment_a= Comment.objects.create(index=1,review=review_a,user=u1,content='comment!!!!',id=10011)
         review_b = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=101)
         comment_b = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
+        review_c = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=999)
 
     def test_add_book(self):
         print("test_add_book success case")
@@ -440,6 +441,16 @@ class ApiTestCase(TestCase):
        self.assertEqual("fail", response.get('status'))
        self.assertEqual('illegal user', response.get('reason'))
 
+    def test_delete_review(self):
+       print("test_delete_review success")
+       response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       session_key = response.get('session_key')
+       self.assertEqual(True, len(session_key) > 1)
+       response = c.post('/api/deleteReviewByID/', {'session_key':session_key,'id':999})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
 
 class UtilsTestCase(TestCase):
     def setUp(self):
