@@ -3,12 +3,13 @@ from django.http import HttpResponse
 from django.contrib import auth
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
+from django.db import transaction
 from datetime import datetime, timedelta
 import json
 from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist,ValidationError
 
 ss = SessionStore()
 
@@ -109,6 +110,7 @@ def get_book_by_id(request):
                 response_data['book_edition'] = book.edition
                 response_data['book_category'] = book.category.name
                 response_data['book_author'] = book.author.name
+                response_data['cover_image'] = book.cover_image
                 response_data['reviews'] = list()
                 review_list = book.review_set.all()
                 for r in review_list:
@@ -147,6 +149,7 @@ def get_all_books(request):
                     "rating": "5",  # TODO: book.rating?
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
+                    "cover_image": b.cover_image,
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -204,10 +207,16 @@ def add_book(request):
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
                 author_ = check_none(request.POST.get('author'))
-                cover_image_="..."
+                cover_image_ = check_none(request.POST.get('cover_image'))
             except EmptyInputError:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'missing required field'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+            # check if the input book exists
+            if len(Book.objects.filter(ISBN=ISBN_)) == 1:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'already existed'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
             # check if the input category exists
@@ -224,10 +233,17 @@ def add_book(request):
                 author_o = Author(name=author_, summary='')
                 author_o.save()
 
-            new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
+            try:
+                with transaction.atomic():
+                    new_book = Book(ISBN=ISBN_, name=name_, publish_date=publish_date_, publish_firm=publish_firm_,
                             edition=edition_,
                             author=author_o, cover_image=cover_image_)
-            new_book.save()
+                    new_book.save()
+            except ValidationError:
+                new_book = Book(ISBN=ISBN_, name=name_, publish_date='0001-01-01', publish_firm=publish_firm_,
+                            edition=edition_,
+                            author=author_o, cover_image=cover_image_)
+                new_book.save()
             new_book.category.set([category_o])
 
             response_data["status"] = 'success'
@@ -249,7 +265,7 @@ def get_pending_books(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -284,7 +300,7 @@ def commit_book(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -326,7 +342,7 @@ def reject_book(request):
         else:
             response_data["user"] = user.name
             try:
-                p = user.permission.get(name='Normal')
+                p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
@@ -361,6 +377,10 @@ def login(request):
     if None not in (u_email, u_pwd):
         user = authenticate(e_mail=u_email, pwd=u_pwd)
         if user is not None:
+            if len(user.permission.filter(name='banned')) != 0:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'permission denied'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
             if is_logged_in(user):
                 key = get_session_key_from_user(user)
             else:
@@ -532,6 +552,7 @@ def vote_display(request):
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+
 def edit_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -558,5 +579,5 @@ def edit_comment(request):
                 comment.content = new_content
                 comment.save()
                 response_data['status'] = 'success'
-            
+
     return HttpResponse(json.dumps(response_data), content_type="application/json")
