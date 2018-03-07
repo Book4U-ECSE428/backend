@@ -36,6 +36,7 @@ def get_profile(request):
             response_data['status'] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+
 def get_review_by_id(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -266,9 +267,7 @@ def get_pending_books(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            try:
-                p = user.permission.get(name='moderator')
-            except ObjectDoesNotExist:
+            if user.permission != 'moderator':
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -301,9 +300,7 @@ def commit_book(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            try:
-                p = user.permission.get(name='moderator')
-            except ObjectDoesNotExist:
+            if user.permission != 'moderator':
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -343,9 +340,7 @@ def reject_book(request):
             response_data["reason"] = 'session expired'
         else:
             response_data["user"] = user.name
-            try:
-                p = user.permission.get(name='moderator')
-            except ObjectDoesNotExist:
+            if user.permission != 'moderator':
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -379,7 +374,7 @@ def login(request):
     if None not in (u_email, u_pwd):
         user = authenticate(e_mail=u_email, pwd=u_pwd)
         if user is not None:
-            if len(user.permission.filter(name='banned')) != 0:
+            if user.permission == 'banned':
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
