@@ -194,6 +194,18 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('no session key', response.get('reason'))
+        Session.objects.all()[0].delete()
+        print("test_get_pending_books permission denied")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/get_pending_books/', {'session_key': session_key, 'ISBN': '123456789-2'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("Normal user", response.get('permission'))
+        self.assertEqual('permission denied', response.get('reason'))
 
     def test_commit_book(self):
         print("test_commit_book success case")
@@ -220,6 +232,7 @@ class ApiTestCase(TestCase):
         response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-1'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
+        self.assertEqual("Normal user", response.get('permission'))
         self.assertEqual('permission denied', response.get('reason'))
 
     def test_reject_book(self):
@@ -229,24 +242,25 @@ class ApiTestCase(TestCase):
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
-        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
+        response = c.post('/api/reject_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         print("test_commit_book book does not exist")
-        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-3'})
+        response = c.post('/api/reject_book/', {'session_key': session_key, 'ISBN': '123456789-3'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('book does not exist', response.get('reason'))
         Session.objects.all()[0].delete()
-        print("test_commit_book permission denied")
+        print("test_reject_book permission denied")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
-        response = c.post('/api/commit_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
+        response = c.post('/api/reject_book/', {'session_key': session_key, 'ISBN': '123456789-2'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
+        self.assertEqual("Normal user", response.get('permission'))
         self.assertEqual('permission denied', response.get('reason'))
 
     def test_create_account(self):
@@ -274,6 +288,7 @@ class ApiTestCase(TestCase):
         print("test_login success case")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
         response = response.json()
+        self.assertEqual("Normal user", response.get('permission'))
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         print("test_login repeated login within session")
@@ -301,6 +316,7 @@ class ApiTestCase(TestCase):
         response = c.post('/api/login/', {'e_mail': 'b@b.com', 'password': 'pwd'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
+        self.assertEqual("Banned user", response.get('permission'))
         self.assertEqual("permission denied", response.get('reason'))
 
     def test_get_all_book(self):
@@ -465,16 +481,16 @@ class ApiTestCase(TestCase):
         self.assertEqual('illegal user', response.get('reason'))
 
     def test_delete_review(self):
-        print("test_delete_review success")
-        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
-        response = response.json()
-        self.assertEqual("success", response.get('status'))
-        session_key = response.get('session_key')
-        self.assertEqual(True, len(session_key) > 1)
-        response = c.post('/api/deleteReviewByID/', {'session_key': session_key, 'id': 999})
-        response = response.json()
-        self.assertEqual("success", response.get('status'))
-
+       print("test_delete_review success")
+       response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+       response = response.json()
+       self.assertEqual("success", response.get('status'))
+       session_key = response.get('session_key')
+       self.assertEqual(True, len(session_key) > 1)
+       response = c.post('/api/deleteReviewByID/', {'session_key':session_key,'id':999})
+       response = response.json()
+       self.assertEqual("Normal user", response.get('permission'))
+       self.assertEqual("success", response.get('status'))
 
 class UtilsTestCase(TestCase):
     def setUp(self):
