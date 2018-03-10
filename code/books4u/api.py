@@ -270,6 +270,7 @@ def get_pending_books(request):
                 p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
+                response_data['permission'] = get_user_permission_type(user)
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             response_data["books"] = list()
@@ -305,6 +306,7 @@ def commit_book(request):
                 p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
+                response_data['permission'] = get_user_permission_type(user)
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -347,6 +349,7 @@ def reject_book(request):
                 p = user.permission.get(name='moderator')
             except ObjectDoesNotExist:
                 response_data["status"] = 'fail'
+                response_data['permission'] = get_user_permission_type(user)
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -381,6 +384,7 @@ def login(request):
         if user is not None:
             if len(user.permission.filter(name='banned')) != 0:
                 response_data["status"] = 'fail'
+                response_data['permission'] = get_user_permission_type(user)
                 response_data["reason"] = 'permission denied'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             if is_logged_in(user):
@@ -392,6 +396,7 @@ def login(request):
                 key = ss.session_key
                 ss.save()
             response_data['status'] = 'success'
+            response_data['permission'] = get_user_permission_type(user)
             response_data['session_key'] = key
         else:
             response_data['status'] = 'fail'
@@ -602,9 +607,11 @@ def delete_review_by_id(request):
                 review = Review.objects.get(id=id)
             except:
                 response_data['status'] = 'fail'
+                response_data['permission'] = get_user_permission_type(current_user)
                 response_data['reason'] = 'illegal user'
             else:
                 review.delete()
+                response_data['permission'] = get_user_permission_type(current_user)
                 response_data['status'] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
