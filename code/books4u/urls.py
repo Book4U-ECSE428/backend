@@ -21,4 +21,9 @@ urlpatterns = [
     path('getProfile/', api.get_profile),
     path('edit_comment/', api.edit_comment),
     path('deleteReviewByID/', api.delete_review_by_id),
+    path('setPassword', api.set_password),
+    path('setIntro', api.set_intro),
+    path('setName', api.set_intro),
+    path('setEmail', api.set_email),
+    path('setGender', api.set_gender),
 ]
