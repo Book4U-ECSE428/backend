@@ -10,6 +10,8 @@ c = Client()
 import time
 
 
+
+
 class ApiTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(e_mail='michael@example.com', password=make_password('Password123'), name='michael')
@@ -452,6 +454,170 @@ class ApiTestCase(TestCase):
        response = response.json()
        self.assertEqual("success", response.get('status'))
 
+    def test_setPassword(self):
+        print("test set password #1: successful case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/set_password/', {'session_key': session_key, 'NewPassword': 'Password1234',
+                                                 'OldPassword': 'Password123', 'NewPassword2': 'Password1234'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+
+        print("test set password #2: no new password")
+        response = c.post('/api/set_password', {'session_keu': session_key,'OldPassword': 'Pasword1234', 'NewPassword2': ''})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("missing password", response.get('reason'))
+
+        print("test set password $3: password doesn't match")
+        response = c.post('/api/set_password', {'session_keu': session_key, 'NewPassword': 'Password12345',
+                                                'OldPassword': 'Pasword1234', 'NewPassword2': 'Password123456'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("passwords do not match", response.get('reason'))
+
+        print("test set password #4: authentication failed")
+        response = c.post('/api/set_password/', {'session_key': session_key, 'NewPassword': 'Password1234',
+                                                 'OldPassword': 'Password1', 'NewPassword2': 'Password1234'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("authentication failure", response.get('reason'))
+
+    def test_setName(self):
+        print("test set name #1: successful case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/set_name/', {'session_key': session_key, 'NewName': 'Mike',
+                                             'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+
+        print("test set name #2: missing password")
+        response = c.post('/api/set_name/', {'session_key': session_key, 'NewName': 'Mike'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("password required", response.get('reason'))
+
+        print("test set name #3: missing new name")
+        response = c.post('/api/set_name/', {'session_key': session_key, 'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("update data missing")
+
+        print("test set name #4: authentication failed")
+        response = c.post('/api/set_name/', {'session_key': session_key, 'NewName': 'Mike',
+                                             'Password': 'Password1'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("authentication failure")
+
+    def test_setGender(self):
+        print("test set gender #1: successful case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/set_gender/', {'session_key': session_key, 'NewGender': 'Female',
+                                             'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+
+        print("test set gender #2: missing input")
+        response = c.post('/api/set_gender/', {'session_key': session_key, 'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("update data missing", response.get('reason'))
+
+        print("test set gender #3: invalid input")
+        response = c.post('/api/set_gender/', {'session_key': session_key, 'NewGender': 'Test',
+                                               'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("invalid input", response.get('reason'))
+
+        print("test set gender #4: no password")
+        response = c.post('/api/set_gender/', {'session_key': session_key, 'NewGender': 'Female'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("password required", response.get('reason'))
+
+        print("test set gender #5: authentication failed")
+        response = c.post('/api/set_gender/', {'session_key': session_key, 'NewGender': 'Female',
+                                               'Password': 'Password1'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("authentication failure")
+
+    def test_setEmail(self):
+        print("test set email #1: successful case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/set_email/', {'session_key': session_key, 'NewEmail': 'mike@example.com',
+                                              'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+
+        print("test set email #2: missing email")
+        response = c.post('/api/set_email/', {'session_key': session_key, 'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("update data missing", response.get('reason'))
+
+        print("test set email #3: missing password")
+        response = c.post('/api/set_email/', {'session_key': session_key, 'NewEmail': 'mike@example.com'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("password required", response.get('reason'))
+
+        print("test set email #4: authentication failed")
+        response = c.post('/api/set_email/', {'session_key': session_key, 'NewEmail': 'mike@example.com',
+                                              'Password': 'Password1'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("authentication failure", response.get('reason'))
+
+    def test_setIntro(self):
+        print("test set intro #1: successful case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/set_intro/', {'session_key': session_key, 'NewIntro': 'Cogito ergo sum',
+                                              'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+
+        print("test set intro #2: missing input")
+        response = c.post('/api/set_intro/', {'session_key': session_key, 'Password': 'Password123'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("update data missing")
+
+        print("test set intro #3: missing password")
+        response = c.post('/api/set_intro/', {'session_key': session_key, 'NewIntro': 'Cogito ergo sum'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("password required", response.get('reason'))
+
+        print("test set intro #4: authentication failed")
+        response = c.post('/api/set_intro/', {'session_key': session_key, 'NewIntro': 'Cogito ergo sum',
+                                              'Password': 'Password1'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("authentication failure", response.get('reason'))
+
+
 class UtilsTestCase(TestCase):
     def setUp(self):
         permission_m = Permission.objects.create(name='moderator')
@@ -527,3 +693,4 @@ class UtilsTestCase(TestCase):
         self.assertEqual('Normal user',get_user_permission_type(User.objects.get(e_mail='t@t.com')))
         self.assertEqual('Banned user',get_user_permission_type(User.objects.get(e_mail='b@b.com')))
         self.assertEqual('Moderator',get_user_permission_type(User.objects.get(e_mail='m@m.com')))
+

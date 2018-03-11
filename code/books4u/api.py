@@ -622,15 +622,18 @@ def set_password(request):
         old_password = request.POST.get('OldPassword')
         # get the user email
         email = updated_user.email
+        new_password_confirm = request.Post.get('NewPassword2')
 
         if new_password is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'missing password'
+        elif new_password != new_password_confirm:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'passwords do not match'
         elif authenticate(email, old_password) is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'authentication failure'
         else:
-
             # set the the password
             updated_user.password.set(new_password)
             # save the user to the data based
@@ -655,7 +658,7 @@ def set_gender(request):
         if new_gender is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'update data missing'
-        elif new_gender != "male" or new_gender != "female" or new_gender != "unspecific":
+        elif new_gender != "Male" or new_gender != "Female" or new_gender != "Unknown":
             response_data['status'] = 'fail'
             response_data['reason'] = 'invalid input'
         elif password is None:
