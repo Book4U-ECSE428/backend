@@ -42,7 +42,14 @@ def authenticate(e_mail, pwd):
         else:
             return None
     else:
-        return None
+        userlist2 = User.objects.filter(name=e_mail)  # Login with username instead
+        if len(userlist2) == 1:  # user not found, return none
+            if check_password(pwd, userlist2[0].password):  # check password
+                return userlist2[0]
+            else:
+                return None
+        else:
+            return None
 
 
 def is_logged_in(user):

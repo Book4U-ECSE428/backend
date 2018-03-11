@@ -420,6 +420,9 @@ def create_account(request):
         elif User.objects.filter(e_mail=account_e_mail).exists():
             response_data['status'] = 'fail'
             response_data['reason'] = 'existing_email'
+        elif User.objects.filter(name=account_name).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_username'
         elif not password_filter(account_password):
             response_data['status'] = 'fail'
             response_data['reason'] = 'pwd_filter_failure'
