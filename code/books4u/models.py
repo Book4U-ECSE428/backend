@@ -17,16 +17,10 @@ GENDER_CHOICES = (
 )
 
 PERMISSION_CHOICES = (
+    ("normal", 'normal'),
     ("banned", 'banned'),
-    ("moderator",'moderator'),
+    ("moderator", 'moderator'),
 )
-
-
-class Permission(models.Model):
-    name = models.CharField(max_length=20, choices=PERMISSION_CHOICES, default="Normal")
-
-    def __str__(self):
-        return self.name
 
 
 class User(models.Model):
@@ -35,7 +29,7 @@ class User(models.Model):
     e_mail = models.CharField(max_length=100, default="")
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default="Unknown")
     personal_intro = models.CharField(max_length=1000, default="")
-    permission = models.ManyToManyField(Permission)
+    permission = models.CharField(max_length=20, choices=PERMISSION_CHOICES, default="normal")
 
     def __str__(self):
         return self.name + '' + self.e_mail
@@ -65,7 +59,7 @@ class Book(models.Model):
     visibility = models.BooleanField(default=False)
     category = models.ManyToManyField(BookCategory)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    cover_image=models.TextField()
+    cover_image = models.TextField()
 
     def __str__(self):
         return self.name

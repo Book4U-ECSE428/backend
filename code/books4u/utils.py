@@ -6,18 +6,18 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
 
 
-
 class EmptyInputError(Exception):
     """Raised when input value is None"""
 
+
 def check_none(input):
-    if input is None or input.isspace() or input =='':
+    if input is None or input.isspace() or input == '':
         raise EmptyInputError
-    
+
     return input
 
-def password_filter(pwd):
 
+def password_filter(pwd):
     length_check = len(pwd) >= 8
     digit_check = re.search(r"\d", pwd)
     if digit_check is None:
@@ -34,7 +34,6 @@ def password_filter(pwd):
     return pwd_check
 
 
-
 def authenticate(e_mail, pwd):
     userlist = User.objects.filter(e_mail=e_mail)  # get user based on his username
     if len(userlist) == 1:  # user not found, return none
@@ -43,8 +42,14 @@ def authenticate(e_mail, pwd):
         else:
             return None
     else:
-        return None
-
+        userlist2 = User.objects.filter(name=e_mail)  # Login with username instead
+        if len(userlist2) == 1:  # user not found, return none
+            if check_password(pwd, userlist2[0].password):  # check password
+                return userlist2[0]
+            else:
+                return None
+        else:
+            return None
 
 
 def is_logged_in(user):
@@ -67,6 +72,7 @@ def get_session_key_from_user(user):
                 return s.session_key
     return None
 
+
 def get_user_from_session_key(session_key):
     session = Session.objects.filter(session_key=session_key)
     for s in session:
@@ -77,10 +83,10 @@ def get_user_from_session_key(session_key):
     else:
         return User.objects.filter(pk=session[0].get_decoded().get('user_id'))[0]
 
+
 def get_user_permission_type(user):
-    if len(user.permission.filter(name='banned')) != 0:
+    if user.permission == 'banned':
         return 'Banned user'
-    if len(user.permission.filter(name='moderator')) != 0:
+    if user.permission == 'moderator':
         return 'Moderator'
     return 'Normal user'
-
