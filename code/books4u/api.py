@@ -609,5 +609,6 @@ def delete_review_by_id(request):
                 review.delete()
                 response_data['permission'] = get_user_permission_type(current_user)
                 response_data['status'] = 'success'
+                response_data['id'] = id
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
