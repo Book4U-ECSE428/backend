@@ -123,6 +123,7 @@ def get_book_by_id(request):
                         'id': r.id,
                         'author': r.user.e_mail
                     })
+                response_data['permission'] = get_user_permission_type(user)
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -608,5 +609,6 @@ def delete_review_by_id(request):
                 review.delete()
                 response_data['permission'] = get_user_permission_type(current_user)
                 response_data['status'] = 'success'
+                response_data['id'] = id
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
