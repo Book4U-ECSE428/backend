@@ -11,6 +11,7 @@ class UserAdmin(admin.ModelAdmin):
         'e_mail',
         'gender',
         'personal_intro',
+        'permission',
     ]
 
 
@@ -69,7 +70,6 @@ class VoteAdmin(admin.ModelAdmin):
     ]
 
 
-admin.site.register(Permission, PermissionAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(BookCategory, BookCategoryAdmin)
