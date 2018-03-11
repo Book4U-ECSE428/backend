@@ -615,3 +615,196 @@ def delete_review_by_id(request):
                 response_data['id'] = id
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def set_password(request):
+    # initialize an output
+    response_data = dict()
+    # get the user
+
+    if request.method == "POST":
+        session_key = request.POST.get('session_key')
+        updated_user = get_user_from_session_key(session_key)
+        # get the new password from the request by a post action
+        new_password = request.POST.get('NewPassword')
+        # get the original password
+        old_password = request.POST.get('OldPassword')
+        # get the user email
+        email = updated_user.e_mail
+        new_password_confirm = request.POST.get('NewPassword2')
+
+        if new_password is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'missing password'
+        elif new_password != new_password_confirm:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'passwords do not match'
+        elif authenticate(email, old_password) is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'authentication failure'
+        else:
+            # set the the password
+            updated_user.password = new_password
+            # save the user to the data based
+            updated_user.save()
+            # get the user's email
+            response_data['status'] = 'success'
+
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def set_gender(request):
+    response_data = dict()
+
+    if request.method == "POST":
+        # required info for updating name
+        session_key = request.POST.get('session_key')
+        update_user = get_user_from_session_key(session_key)
+        new_gender = request.POST.get('NewGender')
+        password = request.POST.get("Password")
+        email = update_user.e_mail
+        if new_gender is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'update data missing'
+        elif new_gender != "Male" and new_gender != "Female" and new_gender != "Unknown":
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'invalid input'
+        elif password is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'password required'
+        elif authenticate(email, password) is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'authentication failed'
+        else:
+            # set the name
+            update_user.gender = new_gender
+            # save the setting
+            update_user.save()
+            # verify the setting
+            if update_user.gender == new_gender:
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Saving failed'
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def set_email(request):
+    response_data = dict()
+
+    if request.method == "POST":
+        # required info for updating name
+        session_key = request.POST.get('session_key')
+        update_user = get_user_from_session_key(session_key)
+        new_email = request.POST.get('NewEmail')
+        password = request.POST.get("Password")
+        email = update_user.e_mail
+
+        if new_email is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'update data missing'
+        elif password is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'password required'
+        elif authenticate(email, password) is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'authentication failed'
+        else:
+            # set the name
+            update_user.e_mail = new_email
+            # save the setting
+            update_user.save()
+            # verify the setting
+            if update_user.e_mail == new_email:
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Saving failed'
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def set_intro(request):
+    response_data = dict()
+    if request.method == "POST":
+        # required info for updating name
+        session_key = request.POST.get('session_key')
+        update_user = get_user_from_session_key(session_key)
+        new_intro = request.POST.get('NewIntro')
+        password = request.POST.get("Password")
+        email = update_user.e_mail
+
+        if new_intro is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'update data missing'
+        elif password is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'password required'
+        elif authenticate(email, password) is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'authentication failed'
+        else:
+            # set the intro
+            update_user.intro = new_intro
+            # save the setting
+            update_user.save()
+            # verify the setting
+            if update_user.intro == new_intro:
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Saving failed'
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def set_name(request):
+    response_data = dict()
+
+    if request.method == "POST":
+        session_key = request.POST.get('session_key')
+        update_user = get_user_from_session_key(session_key)
+        # required info for updating name
+
+        new_name = request.POST.get('NewName')
+        password = request.POST.get("Password")
+        email = update_user.e_mail
+
+        if new_name is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'update data missing'
+        elif password is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'password required'
+        elif authenticate(email, password) is None:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'authentication failure'
+        else:
+            # set the name
+            update_user.name = new_name
+            # save the setting
+            update_user.save()
+            # verify the setting
+            if update_user.name == new_name:
+                response_data['status'] = 'success'
+            else:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Saving failed'
+    else:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'request_method'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
