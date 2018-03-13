@@ -10,6 +10,7 @@ from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.hashers import make_password
 
 ss = SessionStore()
 
@@ -644,7 +645,7 @@ def set_password(request):
             response_data['reason'] = 'authentication failure'
         else:
             # set the the password
-            updated_user.password = new_password
+            updated_user.password = make_password(new_password)
             # save the user to the data based
             updated_user.save()
             # get the user's email
