@@ -714,6 +714,9 @@ def set_email(request):
         elif password is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'password required'
+        elif User.objects.filter(e_mail=new_email).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_email'
         elif authenticate(email, password) is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'authentication failed'
@@ -790,6 +793,9 @@ def set_name(request):
         elif password is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'password required'
+        elif User.objects.filter(name=new_name).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_username'
         elif authenticate(email, password) is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'authentication failure'
