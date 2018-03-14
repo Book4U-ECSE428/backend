@@ -128,3 +128,6 @@ STATIC_URL = '/static/'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')

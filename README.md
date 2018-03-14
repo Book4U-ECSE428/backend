@@ -1,5 +1,10 @@
 # ECSE-428 Books4U
 [![Build Status](https://travis-ci.org/Book4U-ECSE428/backend.svg?branch=master)](https://travis-ci.org/Book4U-ECSE428/backend)
+## Deployment
+1. run deploy.sh
+```
+sudo bash deploy.sh
+```
 ## Development setup:
 1. we need python 3.6 and pip
 ```
@@ -28,10 +33,10 @@ password: books4ubooks4u
 docker build -t books4u .
 docker run books4u
 ```
-the first command will download and install all dependencies 
+the first command will download and install all dependencies
 the second command will start the test
 
-## Basics of development: 
+## Basics of development:
 1. Define api url in code/books4u/api.py
 2. Write actual implementation of api in api.py (same folder)
 3. Write unit tests in tests.py
