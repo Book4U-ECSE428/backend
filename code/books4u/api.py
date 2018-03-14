@@ -759,11 +759,11 @@ def set_intro(request):
             response_data['reason'] = 'authentication failed'
         else:
             # set the intro
-            update_user.intro = new_intro
+            update_user.personal_intro = new_intro
             # save the setting
             update_user.save()
             # verify the setting
-            if update_user.intro == new_intro:
+            if update_user.personal_intro == new_intro:
                 response_data['status'] = 'success'
             else:
                 response_data['status'] = 'fail'
