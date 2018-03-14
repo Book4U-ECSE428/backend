@@ -7,7 +7,7 @@ python:
 services:
   - docker
 before_script:
-  - docker build -t books4u .
+  - docker build -t books4u-test -f Docker-test .
 # command to run tests
 script:
-  - docker run books4u
+  - docker run books4u-test
