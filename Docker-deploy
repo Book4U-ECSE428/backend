@@ -31,5 +31,6 @@ COPY . /home/docker/code/
 RUN cd /home/docker/code/code/ && python3 manage.py collectstatic --noinput
 
 EXPOSE 8000
+EXPOSE 8080
 EXPOSE 5432
 CMD ["supervisord", "-n"]
