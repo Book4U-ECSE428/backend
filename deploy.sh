@@ -1,5 +1,7 @@
 #!/bin/bash
 sudo docker swarm leave -f
+sudo service docker stop
+sudo service docker start
 git clone https://github.com/Book4U-ECSE428/front.git
 mkdir ./code/ECSE428/static/
 mv front/ ./code/ECSE428/static/
