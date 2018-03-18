@@ -129,6 +129,78 @@ def get_book_by_id(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
+def get_books_by_isbn(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_isbn = request.POST.get('isbn')
+            if book_isbn is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no ISBN'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.ISBN == book_isbn:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def get_books_by_author(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_author_name = request.POST.get('author')
+            if book_author_name is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no author'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.author.name == book_author_name:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def get_all_books(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
