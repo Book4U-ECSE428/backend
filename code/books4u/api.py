@@ -530,7 +530,7 @@ def add_comment(request):
                 response_data['status'] = 'fail'
             else:
                 response_data['status'] = 'success'
-                Comment.objects.create(index=0, review=review, user=user, content=content)
+                Comment.objects.create(index=0, review=review, user=user, content=content, modified=False)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
