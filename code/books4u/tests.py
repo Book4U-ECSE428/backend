@@ -698,6 +698,23 @@ class ApiTestCase(TestCase):
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("no author", response.get('reason'))
 
+    def test_get_book_by_publish_firm(self):
+        print("test get book by author case #1: success")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/get_books_by_publish_firm',
+                          {'session_key': session_key, 'publish_firm': 'test_firm'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test get book by author case #2: missing author name")
+        response = c.post('/api/get_books_by_publish_firm', {'session_key': session_key})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual("no publish firm", response.get('reason'))
+
 
 class UtilsTestCase(TestCase):
     def setUp(self):

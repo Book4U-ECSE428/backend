@@ -165,6 +165,42 @@ def get_books_by_isbn(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
+def get_books_by_publish_firm(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_publish_firm = request.POST.get('publish_firm')
+            if book_publish_firm is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no publish firm'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.publish_firm == book_publish_firm:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def get_books_by_author(request):
     response_data = dict()
     session_key = request.POST.get('session_key')

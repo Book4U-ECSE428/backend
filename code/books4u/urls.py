@@ -28,4 +28,5 @@ urlpatterns = [
     path('setGender/', api.set_gender),
     path('get_books_by_author', api.get_books_by_author),
     path('get_books_by_isbn', api.get_books_by_isbn),
+    path('get_books_by_publish_firm', api.get_books_by_publish_firm),
 ]
