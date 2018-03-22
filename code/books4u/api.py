@@ -75,6 +75,7 @@ def get_review_by_id(request):
                         'content': c.content,
                         'user': c.user.name,
                         'id': c.id,
+                        'modified': c.modified,
                         # mock vote value
                         'vote': 100
                     })
@@ -611,6 +612,7 @@ def comments_display(request):
                     "content": c.content,
                     "index": c.index,
                     "id": c.id,
+                    "modified": c.modified
                 })
             response_data['status'] = 'success'
 
@@ -643,7 +645,7 @@ def add_comment(request):
                 response_data['status'] = 'fail'
             else:
                 response_data['status'] = 'success'
-                Comment.objects.create(index=0, review=review, user=user, content=content)
+                Comment.objects.create(index=0, review=review, user=user, content=content, modified=False)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
@@ -698,6 +700,7 @@ def edit_comment(request):
                 response_data['reason'] = 'illegal user'
             else:
                 comment.content = new_content
+                comment.modified = True
                 comment.save()
                 response_data['status'] = 'success'
 
