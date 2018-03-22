@@ -315,7 +315,6 @@ def add_book(request):
             try:
                 ISBN_ = check_none(request.POST.get('ISBN'))
                 name_ = check_none(request.POST.get('name'))
-                publish_date_ = check_none(request.POST.get('publish_date'))
                 publish_firm_ = check_none(request.POST.get('publish_firm'))
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
@@ -326,6 +325,13 @@ def add_book(request):
                 response_data["reason"] = 'missing required field'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+            try:
+                publish_date_ = check_none(request.POST.get('publish_date'))
+            except EmptyInputError:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'date not valid'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+                
             # check if the input book exists
             if len(Book.objects.filter(ISBN=ISBN_)) == 1:
                 response_data["status"] = 'fail'
