@@ -97,7 +97,7 @@ class ApiTestCase(TestCase):
                            'cover_image': 'https://vignette.wikia.nocookie.net/arthur/images/a/a7/No_Image.jpg/revision/latest?cb=20130610195200'})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
-        self.assertEqual('missing required field', response.get('reason'))
+        self.assertEqual('date not valid', response.get('reason'))
         print("test_add_book missing field : publish_firm")
         response = c.post('/api/add_book/',
                           {'session_key': session_key, 'ISBN': '123456789-0', 'name': 'test_book',
