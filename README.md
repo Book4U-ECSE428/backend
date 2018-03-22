@@ -1,7 +1,12 @@
 # ECSE-428 Books4U
 [![Build Status](https://travis-ci.org/Book4U-ECSE428/backend.svg?branch=master)](https://travis-ci.org/Book4U-ECSE428/backend)
 ## Deployment
-1. run deploy.sh
+1. Download books4u.pem cert from Google Drive
+2. shh to aws ec2 instance
+```
+ssh -i "books4u.pem" ubuntu@ec2-35-182-205-51.ca-central-1.compute.amazonaws.com
+```
+3. run deploy.sh
 ```
 sudo bash deploy.sh
 ```
