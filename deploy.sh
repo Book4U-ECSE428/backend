@@ -1,4 +1,7 @@
 #!/bin/bash
+git stash
+git checkout master
+git pull
 sudo docker swarm leave -f
 sudo service docker stop
 sudo service docker start
@@ -9,4 +12,3 @@ sudo docker build -t books4u-deploy -f Docker-deploy .
 sudo docker swarm init
 sudo docker stack deploy -c docker-compose.yml books4u-deploy
 rm -rf ./code/ECSE428/static/
-# docker swarm leave -f
