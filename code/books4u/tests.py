@@ -656,6 +656,33 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("authentication failed", response.get('reason'))
+    
+    def test_add_comment(self):
+        print("test_add_comment#1 success case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        self.assertEqual(True, len(session_key) > 1)
+        response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': 'some random comments'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test_add_comment#2 wrong session key")
+        response = c.post('/api/addComment/',
+                          {'session_key': 'dfasfsadfasfsadfsaf', 'id': 999, 'content': 'miaomiaomiao'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('session expired', response.get('reason'))
+        print("test_add_comment#3 missing content")
+        response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': ''})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        print("test_add_comment#4 non-existing review")
+        response = c.post('/api/addComment/',
+                          {'session_key': session_key, 'id': 428932, 'content': 'miaomiaomiao'})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('Review does not exist', response.get('reason'))
 
 
 class UtilsTestCase(TestCase):
