@@ -10,6 +10,7 @@ from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.hashers import make_password
 
 ss = SessionStore()
 
@@ -129,6 +130,114 @@ def get_book_by_id(request):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
+def get_books_by_isbn(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_isbn = request.POST.get('isbn')
+            if book_isbn is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no ISBN'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.ISBN == book_isbn:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def get_books_by_publish_firm(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_publish_firm = request.POST.get('publish_firm')
+            if book_publish_firm is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no publish firm'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.publish_firm == book_publish_firm:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def get_books_by_author(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    else:
+        user = get_user_from_session_key(session_key)
+        if user is None:
+            response_data["status"] = 'fail'
+            response_data["reason"] = 'session expired'
+        else:
+            response_data['request_user'] = user.name
+            book_author_name = request.POST.get('author')
+            if book_author_name is None:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'no author'
+            else:
+                response_data["books"] = list()
+                response_data["status"] = 'success'
+                book_list = Book.objects.all()
+                for b in book_list:
+                    if b.author.name == book_author_name:
+                        response_data["books"].append({
+                            "id": b.id,
+                            "ISBN": b.ISBN,
+                            "name": b.name,
+                            "author": b.author.name,
+                            "publish_date": str(b.publish_date),
+                            "edition": b.edition,
+                            "publish_firm": b.publish_firm,
+                            "cover_image": b.cover_image,
+                        })
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def get_all_books(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
@@ -207,7 +316,6 @@ def add_book(request):
             try:
                 ISBN_ = check_none(request.POST.get('ISBN'))
                 name_ = check_none(request.POST.get('name'))
-                publish_date_ = check_none(request.POST.get('publish_date'))
                 publish_firm_ = check_none(request.POST.get('publish_firm'))
                 edition_ = check_none(request.POST.get('edition'))
                 category_ = check_none(request.POST.get('category'))
@@ -218,6 +326,13 @@ def add_book(request):
                 response_data["reason"] = 'missing required field'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+            try:
+                publish_date_ = check_none(request.POST.get('publish_date'))
+            except EmptyInputError:
+                response_data["status"] = 'fail'
+                response_data["reason"] = 'date not valid'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+                
             # check if the input book exists
             if len(Book.objects.filter(ISBN=ISBN_)) == 1:
                 response_data["status"] = 'fail'
@@ -647,7 +762,7 @@ def set_password(request):
             response_data['reason'] = 'authentication failure'
         else:
             # set the the password
-            updated_user.password = new_password
+            updated_user.password = make_password(new_password)
             # save the user to the data based
             updated_user.save()
             # get the user's email
@@ -716,6 +831,9 @@ def set_email(request):
         elif password is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'password required'
+        elif User.objects.filter(e_mail=new_email).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_email'
         elif authenticate(email, password) is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'authentication failed'
@@ -758,11 +876,11 @@ def set_intro(request):
             response_data['reason'] = 'authentication failed'
         else:
             # set the intro
-            update_user.intro = new_intro
+            update_user.personal_intro = new_intro
             # save the setting
             update_user.save()
             # verify the setting
-            if update_user.intro == new_intro:
+            if update_user.personal_intro == new_intro:
                 response_data['status'] = 'success'
             else:
                 response_data['status'] = 'fail'
@@ -792,6 +910,9 @@ def set_name(request):
         elif password is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'password required'
+        elif User.objects.filter(name=new_name).exists():
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'existing_username'
         elif authenticate(email, password) is None:
             response_data['status'] = 'fail'
             response_data['reason'] = 'authentication failure'
