@@ -622,6 +622,43 @@ def comments_display(request):
 def add_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
+    review_id = request.POST.get('id')
+    content = request.POST.get('content')
+    reply_username = request.POST.get('reply')
+    user = get_user_from_session_key(session_key)
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif user is None:
+        response_data["status"] = 'fail'
+        response_data["reason"] = 'session expired'
+    elif review_id is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif content is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no content key'
+    elif content == '':
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no content input'
+    else:
+        try:
+            review = Review.objects.get(pk=int(review_id))
+            response_data['user'] = user.name
+        except ObjectDoesNotExist:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'Review does not exist'
+            return HttpResponse(json.dumps(response_data), content_type="application/json")
+        if reply_username is not None:
+            content = '@' + str(reply_username) + content
+        response_data['status'] = 'success'
+        Comment.objects.create(index=0, review=review, user=user, content=content, modified=False)
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def add_comment_bak(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
     if session_key is None:
         response_data['status'] = 'fail'
         response_data['reason'] = 'no session key'
