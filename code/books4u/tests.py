@@ -742,6 +742,21 @@ class ApiTestCase(TestCase):
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("no publish firm", response.get('reason'))
 
+    def test_report_comment(self):
+        print("test success ")
+        response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key1 = response.get('session_key')
+        response = c.post('/api/report_comment/', {'session_key': session_key1, 'id': 10011})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        #self.assertEqual("why", response.get('reason'))
+        print("test fails since created ")
+        response = c.post('/api/report_comment/', {'session_key': session_key1, 'id': 10011})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+
 
 class UtilsTestCase(TestCase):
     def setUp(self):
