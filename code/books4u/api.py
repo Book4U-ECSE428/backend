@@ -644,15 +644,19 @@ def add_comment(request):
     else:
         try:
             review = Review.objects.get(pk=int(review_id))
+            comments_list = Comment.objects.filter(review=review)
             response_data['user'] = user.name
         except ObjectDoesNotExist:
             response_data['status'] = 'fail'
             response_data['reason'] = 'Review does not exist'
             return HttpResponse(json.dumps(response_data), content_type="application/json")
+        index_number = len(comments_list)
         if reply_username is not None:
             content = '@' + str(reply_username) + content
         response_data['status'] = 'success'
-        Comment.objects.create(index=0, review=review, user=user, content=content, modified=False)
+        # index is for testing purpose, front end may not need it
+        response_data['index'] = index_number
+        Comment.objects.create(index=index_number, review=review, user=user, content=content, modified=False)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
