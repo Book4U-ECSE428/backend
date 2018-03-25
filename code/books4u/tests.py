@@ -46,6 +46,7 @@ class ApiTestCase(TestCase):
         review_b = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=101)
         comment_b = Comment.objects.create(index=1, review=review_b, user=u1, content="Your review is very good")
         review_c = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=999)
+        review_v = Review.objects.create(user=moderator, content='verygood', rating=5, book=book_c, id=100)
 
     def test_add_book(self):
         print("test_add_book success case")
@@ -757,6 +758,61 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
 
+    def test_vote_like(self):
+        print("test vote_like:#1success case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        response = c.post('/api/vote_like/',
+                          {'session_key': session_key, 'id': 100})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test vote_like:#2 wrong session key")
+        response = c.post('/api/vote_like/',
+                          {'session_key': 'dfasfsadfasfsadfsaf',  'id': 100})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('session expired', response.get('reason'))
+        print("test vote_like:#3 missing reviewid")
+        response = c.post('/api/vote_like/', {'session_key': session_key})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('no reviewid', response.get('reason'))
+        print("test vote_like:#4 self like")
+        response = c.post('/api/vote_like/', {'session_key': session_key,'id': 101})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('A user should not like his own review', response.get('reason'))
+        # saving failed and creating fialed cases cannot be tested
+
+    def test_vote_dislike(self):
+        print("test vote_dislike:#1success case")
+        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        session_key = response.get('session_key')
+        response = c.post('/api/vote_dislike/',
+                          {'session_key': session_key, 'id':100})
+        response = response.json()
+        self.assertEqual("success", response.get('status'))
+        print("test vote_dislike:#2 wrong session key")
+        response = c.post('/api/vote_dislike/',
+                          {'session_key': 'dfasfsadfasfsadfsaf', 'id':100})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('session expired', response.get('reason'))
+        print("test vote_dislike:#3 missing reviewid")
+        response = c.post('/api/vote_dislike/', {'session_key': session_key})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('no reviewid', response.get('reason'))
+        print("test vote_dislike:#4 self dislike")
+        response = c.post('/api/vote_dislike/', {'session_key': session_key, 'id': 101})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('A user should not dislike his own review', response.get('reason'))
+        # saving failed and creating fialed cases cannot be tested
 
 class UtilsTestCase(TestCase):
     def setUp(self):
@@ -835,3 +891,4 @@ class UtilsTestCase(TestCase):
         self.assertEqual('Normal user', get_user_permission_type(User.objects.get(e_mail='t@t.com')))
         self.assertEqual('Banned user', get_user_permission_type(User.objects.get(e_mail='b@b.com')))
         self.assertEqual('Moderator', get_user_permission_type(User.objects.get(e_mail='m@m.com')))
+        
