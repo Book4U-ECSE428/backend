@@ -98,6 +98,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=9999, default='')
     modified = models.BooleanField(default=False)
+    report_counter = models.IntegerField(default=0)
 
     def __str__(self):
         return "comment by: " + self.user.name
