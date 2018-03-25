@@ -504,6 +504,7 @@ def login(request):
             else:
                 ss.create()
                 ss['user_id'] = user.id
+                ss['reported_comment'] = []
                 ss.set_expiry(1800)
                 key = ss.session_key
                 ss.save()
@@ -932,3 +933,49 @@ def set_name(request):
         response_data['reason'] = 'request_method'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def report_comment(request):
+    response_data = dict()
+    session_key = request.POST.get('session_key')
+    comment_id = request.POST.get('id')
+    user = get_user_from_session_key(session_key)
+    if session_key is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif comment_id is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no comment key'
+    elif user is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'session expired'
+    else:
+        reported_comment_list = get_reported_comment(session_key)
+        if comment_id in reported_comment_list:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'comment already reported'
+        else:
+            try:
+                comment = Comment.objects.get(pk=comment_id)
+            except ObjectDoesNotExist:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Comment Object does not exist'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+            reported_comment_list.append(comment_id)
+            try:
+                #session_key2 = Session.objects.get(session_key=session_key)
+                #session_key2.get_decoded()['reported_comment'] = reported_comment_list
+                #session_key2.save()
+                s = SessionStore(session_key=session_key)
+                s['reported_comment'] = reported_comment_list
+                s.save()
+            except:
+                response_data['status'] = 'fail'
+                response_data['reason'] = 'Session Object does not exist'
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+            comment.report_counter += 1
+            comment.save()
+            response_data['status'] = 'success'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
