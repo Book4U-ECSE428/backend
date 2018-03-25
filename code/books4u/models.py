@@ -70,6 +70,7 @@ class Review(models.Model):
     content = models.CharField(max_length=9999)
     rating = models.IntegerField()
     book = models.ForeignKey(Book, on_delete=models.PROTECT)
+    liked_counter = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.user.name)
