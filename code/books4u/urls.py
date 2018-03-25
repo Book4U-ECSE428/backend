@@ -30,4 +30,6 @@ urlpatterns = [
     path('get_books_by_isbn', api.get_books_by_isbn),
     path('get_books_by_publish_firm', api.get_books_by_publish_firm),
     path('report_comment/', api.report_comment),
+    path('vote_like/', api.vote_like),
+    path('vote_dislike/', api.vote_dislike),
 ]
