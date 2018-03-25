@@ -22,20 +22,24 @@ class ApiTestCase(TestCase):
         banned_user.permission = permission_b
         moderator.save()
         banned_user.save()
-        category = BookCategory.objects.create(name='test_category_1')
+        category1 = BookCategory.objects.create(name='test_category_1')
+        category2 = BookCategory.objects.create(name='test_category_2')
+        categorylist = []
+        categorylist.append(category1)
+        categorylist.append(category2)
         author = Author.objects.create(name='test_author', summary='t')
         book_c = Book.objects.create(ISBN='123456789-1', name='test_book_pending', publish_date='2018-02-10',
                                      publish_firm='test_firm',
                                      edition='1st edition', author=author)
-        book_c.category.set([category])
+        book_c.category.set([category1])
         book_r = Book.objects.create(ISBN='123456789-2', name='test_book_pending', publish_date='2018-02-10',
                                      publish_firm='test_firm',
                                      edition='1st edition', author=author)
-        book_r.category.set([category])
+        book_r.category.set([category1])
         book_c = Book.objects.create(ISBN='123456789-9', name='book_visible', publish_date='2018-02-10',
                                      publish_firm='test_firm',
                                      edition='1st edition', author=author, visibility=True, id=100)
-        book_c.category.set([category])
+        book_c.category.set(categorylist)
         review_a = Review.objects.create(user=u1, content='Hello Han mei mei', rating=5, book=book_c, id=1001)
         review_long = Review.objects.create(user=u1,
                                             content='Da ye, lou shang 322 zhu de shi madongmei jia ba? ma dong shen me? '
@@ -349,10 +353,18 @@ class ApiTestCase(TestCase):
         session_key = response.get('session_key')
         self.assertEqual(True, len(session_key) > 1)
         print("get book'info")
-        # response = c.post('/api/getBookByID/', {'session_key': session_key, 'id': 100})
-        # response = response.json()
-        # self.assertEqual("book_visible", response.get('book_name'))
-        # TODO: More test cases without hard coding
+        response = c.post('/api/getBookByID/', {'session_key': session_key, 'id': 100})
+        response = response.json()
+        self.assertEqual("book_visible", response.get('book_name'))
+        self.assertEqual("123456789-9", response.get('book_ISBN'))
+        self.assertEqual("2018-02-10", response.get('book_publish_date'))
+        self.assertEqual("test_firm", response.get('book_publish_firm'))
+        self.assertEqual("1st edition", response.get('book_edition'))
+        self.assertEqual("test_author", response.get('book_author'))
+        self.assertEqual("test_firm", response.get('book_publish_firm'))
+        self.assertEqual(["test_category_1","test_category_2"], response.get('book_category'))
+
+
 
     def test_get_review_by_id(self):
         print("test_get_review_by_id")
@@ -685,6 +697,10 @@ class ApiTestCase(TestCase):
         response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': ''})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
+        print("test_add_comment#3b check index")
+        response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': 'already a comment for this review'})
+        response = response.json()
+        self.assertEqual(1, response.get('index'))
         print("test_add_comment#4 non-existing review")
         response = c.post('/api/addComment/',
                           {'session_key': session_key, 'id': 428932, 'content': 'miaomiaomiao'})
