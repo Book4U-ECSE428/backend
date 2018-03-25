@@ -638,30 +638,41 @@ def comments_display(request):
 def add_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
+    review_id = request.POST.get('id')
+    content = request.POST.get('content')
+    reply_username = request.POST.get('reply')
+    user = get_user_from_session_key(session_key)
     if session_key is None:
         response_data['status'] = 'fail'
         response_data['reason'] = 'no session key'
+    elif user is None:
+        response_data["status"] = 'fail'
+        response_data["reason"] = 'session expired'
+    elif review_id is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no session key'
+    elif content is None:
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no content key'
+    elif content == '':
+        response_data['status'] = 'fail'
+        response_data['reason'] = 'no content input'
     else:
-        user = get_user_from_session_key(session_key)
-        if user is None:
-            response_data["status"] = 'fail'
-            response_data["reason"] = 'session expired'
-        else:
-            content = request.POST.get('content')
-            review_id = int(request.POST.get('id'))
-            try:
-                review = Review.objects.get(pk=review_id)
-            except ObjectDoesNotExist:
-                response_data['status'] = 'fail'
-                response_data['reason'] = 'Review does not exist'
-                return HttpResponse(json.dumps(response_data), content_type="application/json")
-
+        try:
+            review = Review.objects.get(pk=int(review_id))
+            comments_list = Comment.objects.filter(review=review)
             response_data['user'] = user.name
-            if content == '':
-                response_data['status'] = 'fail'
-            else:
-                response_data['status'] = 'success'
-                Comment.objects.create(index=0, review=review, user=user, content=content, modified=False)
+        except ObjectDoesNotExist:
+            response_data['status'] = 'fail'
+            response_data['reason'] = 'Review does not exist'
+            return HttpResponse(json.dumps(response_data), content_type="application/json")
+        index_number = len(comments_list)
+        if reply_username is not None:
+            content = '@' + str(reply_username) + content
+        response_data['status'] = 'success'
+        # index is for testing purpose, front end may not need it
+        response_data['index'] = index_number
+        Comment.objects.create(index=index_number, review=review, user=user, content=content, modified=False)
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 

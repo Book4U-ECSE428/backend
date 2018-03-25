@@ -696,6 +696,10 @@ class ApiTestCase(TestCase):
         response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': ''})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
+        print("test_add_comment#3b check index")
+        response = c.post('/api/addComment/', {'session_key': session_key, 'id': 999, 'content': 'already a comment for this review'})
+        response = response.json()
+        self.assertEqual(1, response.get('index'))
         print("test_add_comment#4 non-existing review")
         response = c.post('/api/addComment/',
                           {'session_key': session_key, 'id': 428932, 'content': 'miaomiaomiao'})
