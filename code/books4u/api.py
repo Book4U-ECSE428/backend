@@ -10,6 +10,7 @@ from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from operator import itemgetter
 from django.contrib.auth.hashers import make_password
 
 ss = SessionStore()
@@ -67,10 +68,11 @@ def get_review_by_id(request):
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
                 response_data['author'] = review.user.e_mail
+                allcommentlist=list()
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
-                    response_data['comments'].append({
+                    allcommentlist.append({
                         'index': c.index,
                         'content': c.content,
                         'user': c.user.name,
@@ -79,6 +81,7 @@ def get_review_by_id(request):
                         # mock vote value
                         'vote': 100
                     })
+                response_data['comments']=sorted(allcommentlist, key=itemgetter('index'))
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -112,7 +115,6 @@ def get_book_by_id(request):
                 response_data['book_publish_date'] = str(book.publish_date)
                 response_data['book_publish_firm'] = book.publish_firm
                 response_data['book_edition'] = book.edition
-                response_data['book_category'] = book.category.name
                 response_data['book_author'] = book.author.name
                 response_data['cover_image'] = book.cover_image
                 response_data['reviews'] = list()
@@ -125,6 +127,12 @@ def get_book_by_id(request):
                         'id': r.id,
                         'author': r.user.e_mail
                     })
+
+                response_data['book_category'] = list()
+                category_list = book.category.all()
+                for c in category_list:
+                    response_data['book_category'].append(c.name
+)
                 response_data['permission'] = get_user_permission_type(user)
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -255,6 +263,10 @@ def get_all_books(request):
             response_data["status"] = 'success'
             book_list = Book.objects.all()
             for b in book_list:
+                categorylist =list()
+                category_list = b.category.all()
+                for c in category_list:
+                    categorylist.append(c.name)
                 response_data["books"].append({
                     "id": b.id,
                     "name": b.name,
@@ -264,6 +276,7 @@ def get_all_books(request):
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
                     "cover_image": b.cover_image,
+                    "book_category": categorylist
                 })
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -606,14 +619,16 @@ def comments_display(request):
             response_data['comments'] = list()
             currentreview = Review.objects.get(id=reviewid)
             comment_list = Comment.objects.filter(review=currentreview)
+            allcommentlist = list()
             for c in comment_list:
-                response_data['comments'].append({
+                allcommentlist.append({
                     "user": c.user.name,
                     "content": c.content,
                     "index": c.index,
                     "id": c.id,
                     "modified": c.modified
                 })
+            response_data['comments'] = sorted(allcommentlist, key=itemgetter('index'))
             response_data['status'] = 'success'
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
