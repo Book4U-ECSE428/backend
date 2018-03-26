@@ -964,7 +964,7 @@ def set_name(request):
 def report_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
-    comment_id = request.POST.get('id')
+    comment_id = int(request.POST.get('id'))
     user = get_user_from_session_key(session_key)
     if session_key is None:
         response_data['status'] = 'fail'

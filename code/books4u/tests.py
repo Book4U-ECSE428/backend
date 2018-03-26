@@ -768,7 +768,6 @@ class ApiTestCase(TestCase):
         response = c.post('/api/report_comment/', {'session_key': session_key1, 'id': 10011})
         response = response.json()
         self.assertEqual("success", response.get('status'))
-        #self.assertEqual("why", response.get('reason'))
         print("test fails since created ")
         response = c.post('/api/report_comment/', {'session_key': session_key1, 'id': 10011})
         response = response.json()
