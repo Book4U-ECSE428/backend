@@ -350,7 +350,6 @@ def add_book(request):
             if len(Book.objects.filter(ISBN=ISBN_)) == 1:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'already existed'
-                print(request.POST)
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
             # check if the input category exists
