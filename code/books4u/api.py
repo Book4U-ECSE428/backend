@@ -9,7 +9,7 @@ import json
 from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, MultipleObjectsReturned
 from operator import itemgetter
 from django.contrib.auth.hashers import make_password
 
@@ -125,7 +125,8 @@ def get_book_by_id(request):
                         'content': r.content[:100],
                         'rating': r.rating,
                         'id': r.id,
-                        'author': r.user.e_mail
+                        'author': r.user.e_mail,
+                        'liked_counter': r.liked_counter
                     })
 
                 response_data['book_category'] = list()
@@ -354,7 +355,7 @@ def add_book(request):
 
             # check if the input category exists
             try:
-                category_o = BookCategory.objects.get(name=author_)
+                category_o = BookCategory.objects.get(name=category_)
             except ObjectDoesNotExist:  # build-in exception raised by get
                 category_o = BookCategory(name=category_)
                 category_o.save()
@@ -964,7 +965,7 @@ def set_name(request):
 def report_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
-    comment_id = request.POST.get('id')
+    comment_id = int(request.POST.get('id'))
     user = get_user_from_session_key(session_key)
     if session_key is None:
         response_data['status'] = 'fail'
@@ -989,15 +990,12 @@ def report_comment(request):
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             reported_comment_list.append(comment_id)
             try:
-                # session_key2 = Session.objects.get(session_key=session_key)
-                # session_key2.get_decoded()['reported_comment'] = reported_comment_list
-                # session_key2.save()
                 s = SessionStore(session_key=session_key)
                 s['reported_comment'] = reported_comment_list
                 s.save()
             except:
                 response_data['status'] = 'fail'
-                response_data['reason'] = 'Session Object does not exist'
+                response_data['reason'] = 'Session store failure'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             comment.report_counter += 1
             comment.save()
@@ -1115,7 +1113,6 @@ def vote_dislike(request):
                         response_data['reason'] = 'Saving failed'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-
 def forgot_password(request):
     response_data = {}
     email = request.POST.get('email')
@@ -1132,4 +1129,11 @@ def forgot_password(request):
             print(e)
     else:
         response_data['status'] = 'fail'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+  
+def get_all_genres(request):
+    response_data = dict()
+    category_lst = BookCategory.objects.all()
+    response_data['status'] = 'success'
+    response_data['categories'] = [x.name for x in category_lst]
     return HttpResponse(json.dumps(response_data), content_type="application/json")
