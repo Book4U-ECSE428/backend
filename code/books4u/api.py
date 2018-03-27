@@ -67,8 +67,8 @@ def get_review_by_id(request):
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
-                response_data['author'] = review.user.e_mail
-                allcommentlist = list()
+                response_data['author'] = review.user.e_mail 
+                allcommentlist=list()
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -125,7 +125,8 @@ def get_book_by_id(request):
                         'content': r.content[:100],
                         'rating': r.rating,
                         'id': r.id,
-                        'author': r.user.e_mail
+                        'author': r.user.e_mail,
+                        'liked_counter': r.liked_counter
                     })
 
                 response_data['book_category'] = list()
@@ -964,7 +965,7 @@ def set_name(request):
 def report_comment(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
-    comment_id = request.POST.get('id')
+    comment_id = int(request.POST.get('id'))
     user = get_user_from_session_key(session_key)
     if session_key is None:
         response_data['status'] = 'fail'
@@ -989,15 +990,12 @@ def report_comment(request):
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             reported_comment_list.append(comment_id)
             try:
-                # session_key2 = Session.objects.get(session_key=session_key)
-                # session_key2.get_decoded()['reported_comment'] = reported_comment_list
-                # session_key2.save()
                 s = SessionStore(session_key=session_key)
                 s['reported_comment'] = reported_comment_list
                 s.save()
             except:
                 response_data['status'] = 'fail'
-                response_data['reason'] = 'Session Object does not exist'
+                response_data['reason'] = 'Session store failure'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             comment.report_counter += 1
             comment.save()
