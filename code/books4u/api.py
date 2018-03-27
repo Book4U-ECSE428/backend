@@ -989,15 +989,12 @@ def report_comment(request):
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             reported_comment_list.append(comment_id)
             try:
-                #session_key2 = Session.objects.get(session_key=session_key)
-                #session_key2.get_decoded()['reported_comment'] = reported_comment_list
-                #session_key2.save()
                 s = SessionStore(session_key=session_key)
                 s['reported_comment'] = reported_comment_list
                 s.save()
             except:
                 response_data['status'] = 'fail'
-                response_data['reason'] = 'Session Object does not exist'
+                response_data['reason'] = 'Session store failure'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             comment.report_counter += 1
             comment.save()
