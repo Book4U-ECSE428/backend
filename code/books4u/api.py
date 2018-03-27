@@ -9,7 +9,7 @@ import json
 from .models import *
 from django.contrib.auth.hashers import make_password
 from .utils import *
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, MultipleObjectsReturned
 from operator import itemgetter
 from django.contrib.auth.hashers import make_password
 
@@ -68,7 +68,7 @@ def get_review_by_id(request):
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
                 response_data['author'] = review.user.e_mail
-                allcommentlist=list()
+                allcommentlist = list()
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -81,7 +81,7 @@ def get_review_by_id(request):
                         # mock vote value
                         'vote': 100
                     })
-                response_data['comments']=sorted(allcommentlist, key=itemgetter('index'))
+                response_data['comments'] = sorted(allcommentlist, key=itemgetter('index'))
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -132,7 +132,7 @@ def get_book_by_id(request):
                 category_list = book.category.all()
                 for c in category_list:
                     response_data['book_category'].append(c.name
-)
+                                                          )
                 response_data['permission'] = get_user_permission_type(user)
                 response_data["status"] = 'success'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
@@ -263,7 +263,7 @@ def get_all_books(request):
             response_data["status"] = 'success'
             book_list = Book.objects.all()
             for b in book_list:
-                categorylist =list()
+                categorylist = list()
                 category_list = b.category.all()
                 for c in category_list:
                     categorylist.append(c.name)
@@ -345,16 +345,17 @@ def add_book(request):
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'date not valid'
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
-                
+
             # check if the input book exists
             if len(Book.objects.filter(ISBN=ISBN_)) == 1:
                 response_data["status"] = 'fail'
                 response_data["reason"] = 'already existed'
+                print(request.POST)
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
 
             # check if the input category exists
             try:
-                category_o = BookCategory.objects.get(name=author_)
+                category_o = BookCategory.objects.get(name=category_)
             except ObjectDoesNotExist:  # build-in exception raised by get
                 category_o = BookCategory(name=category_)
                 category_o.save()
@@ -989,9 +990,9 @@ def report_comment(request):
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
             reported_comment_list.append(comment_id)
             try:
-                #session_key2 = Session.objects.get(session_key=session_key)
-                #session_key2.get_decoded()['reported_comment'] = reported_comment_list
-                #session_key2.save()
+                # session_key2 = Session.objects.get(session_key=session_key)
+                # session_key2.get_decoded()['reported_comment'] = reported_comment_list
+                # session_key2.save()
                 s = SessionStore(session_key=session_key)
                 s['reported_comment'] = reported_comment_list
                 s.save()
@@ -1022,14 +1023,14 @@ def vote_like(request):
             response_data['reason'] = 'session expired'
         else:
             currentreview = Review.objects.get(pk=reviewid)
-            #if self like, return fail and do not change the count
-            if currentreview.user==user :
+            # if self like, return fail and do not change the count
+            if currentreview.user == user:
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'A user should not like his own review'
-            else :
-                #try get vote
+            else:
+                # try get vote
                 votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
-                #if a vote by this user to currentreview does not exist, create vote
+                # if a vote by this user to currentreview does not exist, create vote
                 if len(votemodellist) == 0:
                     Vote.objects.create(user=user, count=1, review=currentreview)
                     currentreview.liked_counter += 1
@@ -1041,12 +1042,12 @@ def vote_like(request):
                     else:
                         response_data['status'] = 'fail'
                         response_data['reason'] = 'Creating failed'
-                #if exist, update count
+                # if exist, update count
                 else:
-                    if votemodellist[0].count==-1 :
+                    if votemodellist[0].count == -1:
                         votemodellist[0].count = 1
                         currentreview.liked_counter += 2
-                    else :
+                    else:
                         if votemodellist[0].count == 0:
                             votemodellist[0].count = 1
                             currentreview.liked_counter += 1
@@ -1059,6 +1060,7 @@ def vote_like(request):
                         response_data['status'] = 'fail'
                         response_data['reason'] = 'Saving failed'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def vote_dislike(request):
     response_data = dict()
@@ -1084,9 +1086,9 @@ def vote_dislike(request):
             else:
                 votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
                 # if a vote by this user to currentreview does not exist, create vote
-                if len(votemodellist)==0 :
+                if len(votemodellist) == 0:
                     Vote.objects.create(user=user, count=-1, review=currentreview)
-                    currentreview.liked_counter -=1
+                    currentreview.liked_counter -= 1
                     currentreview.save()
                     # check saving
                     votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
@@ -1097,16 +1099,16 @@ def vote_dislike(request):
                         response_data['reason'] = 'Creating failed'
                 # if exist, update count
                 else:
-                    if votemodellist[0].count==1 :
+                    if votemodellist[0].count == 1:
                         votemodellist[0].count = -1
                         currentreview.liked_counter -= 2
-                    else :
+                    else:
                         if votemodellist[0].count == 0:
                             votemodellist[0].count = -1
                             currentreview.liked_counter -= 1
                     votemodellist[0].save()
                     currentreview.save()
-                    #check saving
+                    # check saving
                     if votemodellist[0].count == -1:
                         response_data['status'] = 'success'
                     else:
@@ -1114,3 +1116,10 @@ def vote_dislike(request):
                         response_data['reason'] = 'Saving failed'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+
+def get_all_genres(request):
+    response_data = dict()
+    category_lst = BookCategory.objects.all()
+    response_data['status'] = 'success'
+    response_data['categories'] = [x.name for x in category_lst]
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
