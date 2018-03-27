@@ -32,5 +32,6 @@ urlpatterns = [
     path('report_comment/', api.report_comment),
     path('vote_like/', api.vote_like),
     path('vote_dislike/', api.vote_dislike),
+    path('forgot/', api.forgot_password),
     path('allCategory/', api.get_all_genres),
 ]

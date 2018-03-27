@@ -67,8 +67,8 @@ def get_review_by_id(request):
                 response_data['review_content'] = review.content
                 response_data['review_rating'] = review.rating
                 response_data['book_name'] = review.book.name
-                response_data['author'] = review.user.e_mail 
-                allcommentlist=list()
+                response_data['author'] = review.user.e_mail
+                allcommentlist = list()
                 response_data['comments'] = list()
                 comments_list = review.comment_set.all()
                 for c in comments_list:
@@ -1113,7 +1113,24 @@ def vote_dislike(request):
                         response_data['reason'] = 'Saving failed'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-
+def forgot_password(request):
+    response_data = {}
+    email = request.POST.get('email')
+    print(email)
+    if email is not None:
+        try:
+            user = User.objects.get(e_mail=email)
+            user.password = make_password(user.name)
+            send_email(user.e_mail, user.name)
+            user.save()
+            response_data['status'] = 'success'
+        except ObjectDoesNotExist as e:
+            response_data['status'] = 'fail'
+            print(e)
+    else:
+        response_data['status'] = 'fail'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+  
 def get_all_genres(request):
     response_data = dict()
     category_lst = BookCategory.objects.all()
