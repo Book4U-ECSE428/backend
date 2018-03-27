@@ -4,6 +4,11 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.sessions.models import Session
 from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
+from email.mime.multipart import MIMEMultipart
+import smtplib
+from email.mime.text import MIMEText
+import datetime
+import os
 
 
 class EmptyInputError(Exception):
@@ -112,3 +117,28 @@ def get_book_rating(book):
     total = mean([x.rating for x in review_list])
     return total
 
+
+def send_email(addr, pwd):
+    try:
+        gmail = 'books4u.forgot@gmail.com'
+        password = 'Books4u123!'
+        info = 'Your Books4u account password has been reset'
+        tr = 'Your Password has been reset to {}'.format(pwd)
+        email = MIMEMultipart()
+        e_from = gmail
+        e_to = addr
+        email['Subject'] = info
+        email['From'] = e_from
+        email['To'] = e_to
+        mes = '<p>{}</p><br>{}<br>'.format(
+            str(datetime.datetime.now()), tr)
+        text = MIMEText(mes, 'html')
+        email.attach(text)
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(gmail, password)
+        server.sendmail(e_from, e_to, email.as_string())
+        server.quit()
+    except Exception as e:
+        print(e)
+        
