@@ -108,6 +108,16 @@ def get_user_permission_type(user):
     return 'Normal user'
 
 
+def mean(ratings):
+    return float(sum(ratings)) / max(len(ratings), 1)
+
+
+def get_book_rating(book):
+    review_list = book.review_set.all()
+    total = mean([x.rating for x in review_list])
+    return total
+
+
 def send_email(addr, pwd):
     try:
         gmail = 'books4u.forgot@gmail.com'
@@ -131,3 +141,4 @@ def send_email(addr, pwd):
         server.quit()
     except Exception as e:
         print(e)
+        
