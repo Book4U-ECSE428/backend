@@ -89,6 +89,17 @@ def get_reported_comment(session_key):
         return session[0].get_decoded().get('reported_comment')
 
 
+def get_vote_review(session_key):
+    session = Session.objects.filter(session_key=session_key)
+    for s in session:
+        if is_session_expired(s):
+            s.delete()
+    if len(session) != 1:
+        return None
+    else:
+        return session[0].get_decoded().get('vote_review')
+
+
 def get_user_from_session_key(session_key):
     session = Session.objects.filter(session_key=session_key)
     for s in session:
