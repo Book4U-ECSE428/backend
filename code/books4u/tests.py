@@ -52,6 +52,7 @@ class ApiTestCase(TestCase):
         review_c = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=999)
         review_v = Review.objects.create(user=moderator, content='verygood', rating=5, book=book_c, id=100)
 
+
     def test_add_book(self):
         print("test_add_book success case")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
@@ -800,20 +801,26 @@ class ApiTestCase(TestCase):
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('A user should not like his own review', response.get('reason'))
         # saving failed and creating fialed cases cannot be tested
+        print("test vote_dislike:#5 vote more than once")
+        response = c.post('/api/vote_like/',
+                          {'session_key': session_key, 'id': 100})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('You should not vote a review more than once.', response.get('reason'))
 
     def test_vote_dislike(self):
         print("test vote_dislike:#1success case")
-        response = c.post('/api/login/', {'e_mail': 'michael@example.com', 'password': 'Password123'})
+        response = c.post('/api/login/', {'e_mail': 'm@m.com', 'password': 'pwd'})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         session_key = response.get('session_key')
         response = c.post('/api/vote_dislike/',
-                          {'session_key': session_key, 'id':100})
+                          {'session_key': session_key, 'id':101})
         response = response.json()
         self.assertEqual("success", response.get('status'))
         print("test vote_dislike:#2 wrong session key")
         response = c.post('/api/vote_dislike/',
-                          {'session_key': 'dfasfsadfasfsadfsaf', 'id':100})
+                          {'session_key': 'dfasfsadfasfsadfsaf', 'id':101})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('session expired', response.get('reason'))
@@ -823,11 +830,17 @@ class ApiTestCase(TestCase):
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('no reviewid', response.get('reason'))
         print("test vote_dislike:#4 self dislike")
-        response = c.post('/api/vote_dislike/', {'session_key': session_key, 'id': 101})
+        response = c.post('/api/vote_dislike/', {'session_key': session_key, 'id': 100})
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual('A user should not dislike his own review', response.get('reason'))
         # saving failed and creating fialed cases cannot be tested
+        print("test vote_dislike:#5 vote more than once")
+        response = c.post('/api/vote_dislike/',
+                          {'session_key': session_key, 'id': 101})
+        response = response.json()
+        self.assertEqual("fail", response.get('status'))
+        self.assertEqual('You should not vote a review more than once.', response.get('reason'))
 
 class UtilsTestCase(TestCase):
     def setUp(self):

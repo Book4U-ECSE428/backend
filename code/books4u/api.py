@@ -1020,14 +1020,14 @@ def vote_like(request):
             response_data['reason'] = 'session expired'
         else:
             currentreview = Review.objects.get(pk=reviewid)
-            # if self like, return fail and do not change the count
-            if currentreview.user == user:
+            #if self like, return fail and do not change the count
+            if currentreview.user==user :
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'A user should not like his own review'
-            else:
-                # try get vote
+            else :
+                #try get vote
                 votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
-                # if a vote by this user to currentreview does not exist, create vote
+                #if a vote by this user to currentreview does not exist, create vote
                 if len(votemodellist) == 0:
                     Vote.objects.create(user=user, count=1, review=currentreview)
                     currentreview.liked_counter += 1
@@ -1039,12 +1039,13 @@ def vote_like(request):
                     else:
                         response_data['status'] = 'fail'
                         response_data['reason'] = 'Creating failed'
-                # if exist, update count
+                #if exist, update count
                 else:
-                    if votemodellist[0].count == -1:
+                    """
+                    if votemodellist[0].count==-1 :
                         votemodellist[0].count = 1
                         currentreview.liked_counter += 2
-                    else:
+                    else :
                         if votemodellist[0].count == 0:
                             votemodellist[0].count = 1
                             currentreview.liked_counter += 1
@@ -1056,8 +1057,10 @@ def vote_like(request):
                     else:
                         response_data['status'] = 'fail'
                         response_data['reason'] = 'Saving failed'
+                    """
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'You should not vote a review more than once.'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
 
 def vote_dislike(request):
     response_data = dict()
@@ -1083,9 +1086,9 @@ def vote_dislike(request):
             else:
                 votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
                 # if a vote by this user to currentreview does not exist, create vote
-                if len(votemodellist) == 0:
+                if len(votemodellist)==0 :
                     Vote.objects.create(user=user, count=-1, review=currentreview)
-                    currentreview.liked_counter -= 1
+                    currentreview.liked_counter -=1
                     currentreview.save()
                     # check saving
                     votemodellist = Vote.objects.filter(review=currentreview).filter(user=user)
@@ -1096,22 +1099,27 @@ def vote_dislike(request):
                         response_data['reason'] = 'Creating failed'
                 # if exist, update count
                 else:
-                    if votemodellist[0].count == 1:
+                    """
+                    if votemodellist[0].count==1 :
                         votemodellist[0].count = -1
                         currentreview.liked_counter -= 2
-                    else:
+                    else :
                         if votemodellist[0].count == 0:
                             votemodellist[0].count = -1
                             currentreview.liked_counter -= 1
                     votemodellist[0].save()
                     currentreview.save()
-                    # check saving
+                    #check saving
                     if votemodellist[0].count == -1:
                         response_data['status'] = 'success'
                     else:
                         response_data['status'] = 'fail'
                         response_data['reason'] = 'Saving failed'
+                    """
+                    response_data['status'] = 'fail'
+                    response_data['reason'] = 'You should not vote a review more than once.'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def forgot_password(request):
     response_data = {}
