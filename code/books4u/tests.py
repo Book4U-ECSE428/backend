@@ -52,7 +52,7 @@ class ApiTestCase(TestCase):
         review_c = Review.objects.create(user=u1, content='verygood', rating=5, book=book_c, id=999)
         review_v = Review.objects.create(user=moderator, content='verygood', rating=5, book=book_c, id=100)
 
-    """
+
     def test_add_book(self):
         print("test_add_book success case")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})
@@ -759,7 +759,7 @@ class ApiTestCase(TestCase):
         response = response.json()
         self.assertEqual("fail", response.get('status'))
         self.assertEqual("no publish firm", response.get('reason'))
-    """
+
     def test_report_comment(self):
         print("test success ")
         response = c.post('/api/login/', {'e_mail': 't@t.com', 'password': 'pwd'})

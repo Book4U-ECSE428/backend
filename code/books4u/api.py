@@ -1006,7 +1006,7 @@ def report_comment(request):
 def vote_like(request):
     response_data = dict()
     session_key = request.POST.get('session_key')
-    review_id = int(request.POST.get('id'))
+    review_id = request.POST.get('id')
     if session_key is None:
         response_data['status'] = 'fail'
         response_data['reason'] = 'no session key'
@@ -1019,8 +1019,10 @@ def vote_like(request):
             response_data['status'] = 'fail'
             response_data['reason'] = 'session expired'
         else:
-            vote_review_list = list()
+            review_id = int(review_id)
             vote_review_list = get_vote_review(session_key)
+            vote_review_list = [] if vote_review_list is None else vote_review_list
+            #if voted under same session, fail
             if review_id in vote_review_list :
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'You should not vote a review more than once.'
@@ -1074,6 +1076,7 @@ def vote_dislike(request):
             review_id=int(review_id)
             vote_review_list = get_vote_review(session_key)
             vote_review_list = [] if vote_review_list is None else vote_review_list
+            # if voted under same session, fail
             if review_id in vote_review_list:
                 response_data['status'] = 'fail'
                 response_data['reason'] = 'You should not vote a review more than once.'
