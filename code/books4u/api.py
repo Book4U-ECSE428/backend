@@ -273,7 +273,7 @@ def get_all_books(request):
                     "name": b.name,
                     "author": b.author.name,
                     "publish_date": str(b.publish_date),
-                    "rating": "5",  # TODO: book.rating?
+                    "rating": "No reviews yet" if get_book_rating(b)==0.0 else str(get_book_rating(b)),
                     "edition": b.edition,
                     "publish_firm": b.publish_firm,
                     "cover_image": b.cover_image,
