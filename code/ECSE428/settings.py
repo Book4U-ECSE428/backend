@@ -70,7 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ECSE428.wsgi.application'
 
-sqlite database use for testing db only!!!
+# sqlite database use for testing db only!!!
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
