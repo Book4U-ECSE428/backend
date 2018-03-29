@@ -89,6 +89,17 @@ def get_reported_comment(session_key):
         return session[0].get_decoded().get('reported_comment')
 
 
+def get_vote_review(session_key):
+    session = Session.objects.filter(session_key=session_key)
+    for s in session:
+        if is_session_expired(s):
+            s.delete()
+    if len(session) != 1:
+        return None
+    else:
+        return session[0].get_decoded().get('vote_review')
+
+
 def get_user_from_session_key(session_key):
     session = Session.objects.filter(session_key=session_key)
     for s in session:
@@ -106,6 +117,16 @@ def get_user_permission_type(user):
     if user.permission == 'moderator':
         return 'Moderator'
     return 'Normal user'
+
+
+def mean(ratings):
+    return float(sum(ratings)) / max(len(ratings), 1)
+
+
+def get_book_rating(book):
+    review_list = book.review_set.all()
+    total = mean([x.rating for x in review_list])
+    return total
 
 
 def send_email(addr, pwd):
@@ -131,3 +152,4 @@ def send_email(addr, pwd):
         server.quit()
     except Exception as e:
         print(e)
+        
