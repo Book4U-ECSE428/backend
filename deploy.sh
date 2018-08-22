@@ -1,7 +1,7 @@
 #!/bin/bash
-git stash
-git checkout master
-git pull
+# git stash
+# git checkout master
+# git pull
 sudo docker swarm leave -f
 sudo service docker stop
 sudo service docker start
